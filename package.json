@@ -1,0 +1,9 @@
+{
+  "name": "yuwen-zhibei-pro",
+  "version": "1.0.0",
+  "private": true,
+  "description": "语文智备Pro - 高中语文备课平台（含手写试卷 OCR 识别）",
+  "engines": {
+    "node": ">=18"
+  }
+}
