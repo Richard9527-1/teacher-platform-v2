@@ -6,6 +6,8 @@
 // ========== 全局状态 ==========
 let currentTab = 'all';  // all / text / wenyan / poetry
 let currentFilter = { grade: '', unit: '', type: '', keyword: '' };
+let resourceCurrentPage = 1;    // 教材列表分页：当前页
+const RESOURCE_PAGE_SIZE = 30;  // 每页卡片数（避免 130+ 篇一次性渲染卡顿）
 
 // ========== 获取数据 ==========
 function getResourceData(type) {
@@ -38,109 +40,78 @@ function detailBadge(item) {
   return '<span title="仅有基础信息，详情待补充" style="margin-left:6px;background:#f5f5f5;color:#9e9e9e;padding:1px 7px;border-radius:10px;font-size:0.7rem;font-weight:500;vertical-align:middle;">待完善</span>';
 }
 
-// ========== 渲染全部列表 ==========
-function renderAllList() {
-  const items = getResourceData('');
+// ========== 单卡片渲染（各列表共用） ==========
+function resourceCardHtml(item) {
+  let borderColor = '#4a6fa5';
+  let tagBg = '#e8f0fe';
+  if (item.type === '文言文') borderColor = '#17a2b8';
+  else if (item.type === '古诗词') { borderColor = '#fd7e14'; tagBg = '#fff3e0'; }
+  const cleanTitle = item.title.replace(/^\*\s*/, '');
+  const safeTitle = item.title.replace(/'/g, "\\'");
+  return `
+    <div style="background:var(--card-bg);border-radius:8px;padding:12px;box-shadow:0 1px 4px rgba(0,0,0,0.06);border-left:4px solid ${borderColor};">
+      <div style="font-weight:600;font-size:1rem;">${cleanTitle}${detailBadge(item)}</div>
+      <div style="font-size:0.85rem;color:var(--text-light);">
+        ${item.author || '佚名'} · ${item.dynasty || ''} · ${item.grade || ''}
+        <span style="margin-left:8px;background:var(--bg);padding:1px 8px;border-radius:12px;font-size:0.75rem;">${item.type}</span>
+      </div>
+      <div style="font-size:0.8rem;color:var(--text-light);margin-top:4px;">
+        ${item.tags ? item.tags.slice(0,3).map(t => `<span style="background:${tagBg};padding:1px 8px;border-radius:12px;margin:2px;">${t}</span>`).join('') : ''}
+      </div>
+      <div style="margin-top:8px;display:flex;gap:6px;flex-wrap:wrap;">
+        <button class="btn" onclick="viewResource('${safeTitle}','${item.type}')" style="padding:2px 12px;font-size:0.8rem;">📖 查看</button>
+        <button class="btn" onclick="addToLesson('${safeTitle}')" style="padding:2px 12px;font-size:0.8rem;background:#28a745;">📋 加入备课</button>
+      </div>
+    </div>`;
+}
+
+// ========== 分页渲染（列表共用） ==========
+function renderPaginated(items) {
   if (items.length === 0) {
-    return '<p style="color:#7f8c8d;text-align:center;padding:20px;">暂无数据，请添加教材资源。</p>';
+    return '<p style="color:#7f8c8d;text-align:center;padding:20px;">暂无数据，请调整筛选条件或添加教材资源。</p>';
   }
+  const totalPages = Math.max(1, Math.ceil(items.length / RESOURCE_PAGE_SIZE));
+  resourceCurrentPage = Math.min(Math.max(resourceCurrentPage, 1), totalPages);
+  const start = (resourceCurrentPage - 1) * RESOURCE_PAGE_SIZE;
+  const pageItems = items.slice(start, start + RESOURCE_PAGE_SIZE);
   let html = '<div style="display:grid;grid-template-columns:repeat(auto-fill,minmax(220px,1fr));gap:12px;">';
-  items.forEach(item => {
-    let borderColor = '#4a6fa5';
-    if (item.type === '文言文') borderColor = '#17a2b8';
-    else if (item.type === '古诗词') borderColor = '#fd7e14';
-    html += `
-      <div style="background:var(--card-bg);border-radius:8px;padding:12px;box-shadow:0 1px 4px rgba(0,0,0,0.06);border-left:4px solid ${borderColor};">
-        <div style="font-weight:600;font-size:1rem;">${item.title.replace(/^\*\s*/, '')}${detailBadge(item)}</div>
-        <div style="font-size:0.85rem;color:var(--text-light);">
-          ${item.author || '佚名'} · ${item.dynasty || ''} · ${item.grade || ''}
-          <span style="margin-left:8px;background:var(--bg);padding:1px 8px;border-radius:12px;font-size:0.75rem;">${item.type}</span>
-        </div>
-        <div style="font-size:0.8rem;color:var(--text-light);margin-top:4px;">
-          ${item.tags ? item.tags.slice(0,3).map(t => `<span style="background:#e8f0fe;padding:1px 8px;border-radius:12px;margin:2px;">${t}</span>`).join('') : ''}
-        </div>
-        <div style="margin-top:8px;display:flex;gap:6px;flex-wrap:wrap;">
-          <button class="btn" onclick="viewResource('${item.title}','${item.type}')" style="padding:2px 12px;font-size:0.8rem;">📖 查看</button>
-          <button class="btn" onclick="addToLesson('${item.title}')" style="padding:2px 12px;font-size:0.8rem;background:#28a745;">📋 加入备课</button>
-        </div>
-      </div>
-    `;
-  });
+  pageItems.forEach(item => { html += resourceCardHtml(item); });
   html += '</div>';
+  html += renderResourcePager(items.length, totalPages);
   return html;
 }
 
-// ========== 渲染课文列表 ==========
-function renderTextList() {
-  const items = getResourceData('课文');
-  if (items.length === 0) return '<p style="color:#7f8c8d;text-align:center;padding:20px;">暂无课文数据</p>';
-  let html = '<div style="display:grid;grid-template-columns:repeat(auto-fill,minmax(220px,1fr));gap:12px;">';
-  items.forEach(item => {
-    html += `
-      <div style="background:var(--card-bg);border-radius:8px;padding:12px;box-shadow:0 1px 4px rgba(0,0,0,0.06);border-left:4px solid #4a6fa5;">
-        <div style="font-weight:600;font-size:1rem;">${item.title.replace(/^\*\s*/, '')}${detailBadge(item)}</div>
-        <div style="font-size:0.85rem;color:var(--text-light);">${item.author || '佚名'} · ${item.dynasty || ''} · ${item.grade || ''}</div>
-        <div style="font-size:0.8rem;color:var(--text-light);margin-top:4px;">
-          ${item.tags ? item.tags.slice(0,3).map(t => `<span style="background:#e8f0fe;padding:1px 8px;border-radius:12px;margin:2px;">${t}</span>`).join('') : ''}
-        </div>
-        <div style="margin-top:8px;display:flex;gap:6px;flex-wrap:wrap;">
-          <button class="btn" onclick="viewResource('${item.title}','课文')" style="padding:2px 12px;font-size:0.8rem;">📖 查看</button>
-          <button class="btn" onclick="addToLesson('${item.title}')" style="padding:2px 12px;font-size:0.8rem;background:#28a745;">📋 加入备课</button>
-        </div>
-      </div>
-    `;
-  });
-  html += '</div>';
-  return html;
+function renderResourcePager(total, totalPages) {
+  if (totalPages <= 1) return '';
+  const cur = resourceCurrentPage;
+  let from = Math.max(1, cur - 2);
+  let to = Math.min(totalPages, from + 4);
+  from = Math.max(1, to - 4);
+  const pageBtn = (label, page, opts) => {
+    opts = opts || {};
+    if (opts.disabled) {
+      return `<button class="btn" disabled style="padding:3px 10px;font-size:0.78rem;margin:2px;opacity:.45;cursor:not-allowed;">${label}</button>`;
+    }
+    const active = opts.active ? 'background:#4a6fa5;color:#fff;' : '';
+    return `<button class="btn" onclick="goResourcePage(${page})" style="padding:3px 10px;font-size:0.78rem;margin:2px;${active}">${label}</button>`;
+  };
+  let btns = '';
+  btns += pageBtn('‹ 上一页', cur - 1, { disabled: cur <= 1 });
+  for (let p = from; p <= to; p++) btns += pageBtn(String(p), p, { active: p === cur });
+  btns += pageBtn('下一页 ›', cur + 1, { disabled: cur >= totalPages });
+  return `<div style="display:flex;gap:2px;flex-wrap:wrap;align-items:center;justify-content:center;margin-top:18px;">${btns}<span style="font-size:0.78rem;color:var(--text-light);margin-left:8px;">第 ${cur}/${totalPages} 页 · 共 ${total} 条</span></div>`;
 }
 
-// ========== 渲染文言文列表 ==========
-function renderWenyanList() {
-  const items = getResourceData('文言文');
-  if (items.length === 0) return '<p style="color:#7f8c8d;text-align:center;padding:20px;">暂无文言文数据</p>';
-  let html = '<div style="display:grid;grid-template-columns:repeat(auto-fill,minmax(220px,1fr));gap:12px;">';
-  items.forEach(item => {
-    html += `
-      <div style="background:var(--card-bg);border-radius:8px;padding:12px;box-shadow:0 1px 4px rgba(0,0,0,0.06);border-left:4px solid #17a2b8;">
-        <div style="font-weight:600;font-size:1rem;">${item.title.replace(/^\*\s*/, '')}${detailBadge(item)}</div>
-        <div style="font-size:0.85rem;color:var(--text-light);">${item.author || '佚名'} · ${item.dynasty || ''} · ${item.grade || ''}</div>
-        <div style="font-size:0.8rem;color:var(--text-light);margin-top:4px;">
-          ${item.tags ? item.tags.slice(0,3).map(t => `<span style="background:#e8f0fe;padding:1px 8px;border-radius:12px;margin:2px;">${t}</span>`).join('') : ''}
-        </div>
-        <div style="margin-top:8px;display:flex;gap:6px;flex-wrap:wrap;">
-          <button class="btn" onclick="viewWenyanDetail('${item.title}')" style="padding:2px 12px;font-size:0.8rem;background:#17a2b8;">📖 查看</button>
-          <button class="btn" onclick="addToLesson('${item.title}')" style="padding:2px 12px;font-size:0.8rem;background:#28a745;">📋 加入备课</button>
-        </div>
-      </div>
-    `;
-  });
-  html += '</div>';
-  return html;
+function goResourcePage(n) {
+  resourceCurrentPage = n;
+  refreshResourceView();
 }
 
-// ========== 渲染古诗词列表 ==========
-function renderPoetryList() {
-  const items = getResourceData('古诗词');
-  if (items.length === 0) return '<p style="color:#7f8c8d;text-align:center;padding:20px;">暂无古诗词数据</p>';
-  let html = '<div style="display:grid;grid-template-columns:repeat(auto-fill,minmax(220px,1fr));gap:12px;">';
-  items.forEach(item => {
-    html += `
-      <div style="background:var(--card-bg);border-radius:8px;padding:12px;box-shadow:0 1px 4px rgba(0,0,0,0.06);border-left:4px solid #fd7e14;">
-        <div style="font-weight:600;font-size:1rem;">${item.title.replace(/^\*\s*/, '')}${detailBadge(item)}</div>
-        <div style="font-size:0.85rem;color:var(--text-light);">${item.author || '佚名'} · ${item.dynasty || ''} · ${item.grade || ''}</div>
-        <div style="font-size:0.8rem;color:var(--text-light);margin-top:4px;">
-          ${item.tags ? item.tags.slice(0,3).map(t => `<span style="background:#fff3e0;padding:1px 8px;border-radius:12px;margin:2px;">${t}</span>`).join('') : ''}
-        </div>
-        <div style="margin-top:8px;display:flex;gap:6px;flex-wrap:wrap;">
-          <button class="btn" onclick="viewPoetryDetail('${item.title}')" style="padding:2px 12px;font-size:0.8rem;background:#fd7e14;">📖 赏析</button>
-          <button class="btn" onclick="addToLesson('${item.title}')" style="padding:2px 12px;font-size:0.8rem;background:#28a745;">📋 加入备课</button>
-        </div>
-      </div>
-    `;
-  });
-  html += '</div>';
-  return html;
-}
+// ========== 四个分类列表（统一走分页渲染） ==========
+function renderAllList() { return renderPaginated(getResourceData('')); }
+function renderTextList() { return renderPaginated(getResourceData('课文')); }
+function renderWenyanList() { return renderPaginated(getResourceData('文言文')); }
+function renderPoetryList() { return renderPaginated(getResourceData('古诗词')); }
 
 // ========== 查看详情（统一入口） ==========
 function viewResource(title, type) {
@@ -621,6 +592,7 @@ function initResource() {
   // 标签切换
   document.getElementById('tabAll').addEventListener('click', function() {
     currentTab = 'all';
+    resourceCurrentPage = 1;
     setActiveTab(this);
     document.getElementById('resourceContent').innerHTML = renderAllList();
     document.getElementById('filterType').value = '';
@@ -628,6 +600,7 @@ function initResource() {
   });
   document.getElementById('tabText').addEventListener('click', function() {
     currentTab = 'text';
+    resourceCurrentPage = 1;
     setActiveTab(this);
     document.getElementById('resourceContent').innerHTML = renderTextList();
     document.getElementById('filterType').value = '课文';
@@ -635,6 +608,7 @@ function initResource() {
   });
   document.getElementById('tabWenyan').addEventListener('click', function() {
     currentTab = 'wenyan';
+    resourceCurrentPage = 1;
     setActiveTab(this);
     document.getElementById('resourceContent').innerHTML = renderWenyanList();
     document.getElementById('filterType').value = '文言文';
@@ -642,6 +616,7 @@ function initResource() {
   });
   document.getElementById('tabPoetry').addEventListener('click', function() {
     currentTab = 'poetry';
+    resourceCurrentPage = 1;
     setActiveTab(this);
     document.getElementById('resourceContent').innerHTML = renderPoetryList();
     document.getElementById('filterType').value = '古诗词';
@@ -690,6 +665,7 @@ function initResource() {
     else if (typeVal === '文言文') { currentTab = 'wenyan'; }
     else if (typeVal === '古诗词') { currentTab = 'poetry'; }
     else { currentTab = 'all'; }
+    resourceCurrentPage = 1;
     refreshResourceView();
     // 更新标签高亮
     const allBtns = document.querySelectorAll('#tabAll, #tabText, #tabWenyan, #tabPoetry');
@@ -706,6 +682,7 @@ function initResource() {
     document.getElementById('filterType').value = '';
     currentFilter = { grade: '', unit: '', type: '', keyword: '' };
     currentTab = 'all';
+    resourceCurrentPage = 1;
     refreshResourceView();
     document.querySelectorAll('#tabAll, #tabText, #tabWenyan, #tabPoetry').forEach(b => {
       b.style.background = '#6c757d';
@@ -734,3 +711,4 @@ window.viewWenyanDetail = viewWenyanDetail;
 window.viewPoetryDetail = viewPoetryDetail;
 window.addToLesson = addToLesson;
 window.refreshResourceView = refreshResourceView;
+window.goResourcePage = goResourcePage;

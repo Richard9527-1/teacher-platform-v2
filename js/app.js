@@ -984,3 +984,15 @@ if (notifCountEl) {
     showModule('dashboard');
   }
 }
+
+// ========== PWA：仅在安全上下文（https / localhost）注册 Service Worker ==========
+// file:// 或非安全上下文不注册，避免报错；GitHub Pages（https）等环境可正常启用离线缓存。
+(function setupPWA() {
+  if (!('serviceWorker' in navigator)) return;
+  if (!window.isSecureContext) return;
+  window.addEventListener('load', function() {
+    navigator.serviceWorker.register('sw.js').catch(function(err) {
+      console.warn('[PWA] Service Worker 注册失败：', err);
+    });
+  });
+})();
