@@ -1,23 +1,31 @@
 // js/modules/class.js
 // ============================================================
-// 班级管理模块
+// 班级管理模块（高级版：Excel导入导出/级联删除/搜索分页/考勤历史）
 // ============================================================
+
+var STUDENT_PAGE_SIZE = 20;
+var studentPage = 1;       // 学生列表当前页码
+var studentSearch = '';    // 学生搜索关键词
 
 function renderClass() {
   return `
     <div class="card">
       <h2>👥 班级管理</h2>
-      <div style="display:flex;gap:12px;flex-wrap:wrap;margin-bottom:16px;">
+      <div style="display:flex;gap:12px;flex-wrap:wrap;margin-bottom:16px;" class="class-toolbar">
         <button class="btn" id="addStudentBtn">＋ 添加学生</button>
         <button class="btn" id="addClassBtn">＋ 添加班级</button>
         <button class="btn" id="manageClassBtn">🗂 管理班级</button>
         <button class="btn" id="attendanceBtn">📋 考勤管理</button>
         <button class="btn" id="leaveBtn">📝 请假管理</button>
-        <button class="btn" id="exportClassBtn">📤 导出数据</button>
         <select id="classFilter" style="padding:6px 12px;border-radius:6px;border:1px solid #ddd;">
-          <option value="">全部班级</option>
-          ${loadClassData().classes.map(c => `<option value="${c.id}">${c.name}</option>`).join('')}
+          ${renderClassOptions('')}
         </select>
+      </div>
+      <!-- Excel 工具栏 -->
+      <div style="display:flex;gap:8px;flex-wrap:wrap;margin-bottom:12px;" class="data-toolbar">
+        <button class="btn" id="exportExcelBtn" style="background:#28a745;">📤 导出Excel</button>
+        <button class="btn" id="downloadTemplateBtn" style="background:#17a2b8;">📥 下载模板</button>
+        <label class="btn" style="background:#6c757d;cursor:pointer;margin:0;">📂 导入恢复<input type="file" id="importFileInput" accept=".xlsx,.xls,.json" style="display:none;" /></label>
       </div>
       <div id="classContent">
         ${renderStudentList()}
@@ -27,18 +35,34 @@ function renderClass() {
 }
 
 function renderStudentList() {
-  const data = loadClassData();
-  const filter = document.getElementById('classFilter')?.value || '';
-  let students = data.students;
-  if (filter) {
-    students = students.filter(s => s.classId === filter);
+  var data = loadClassData();
+  var filter = document.getElementById('classFilter')?.value || '';
+  var students = data.students;
+
+  // 班级筛选
+  if (filter) students = students.filter(function(s) { return s.classId === filter; });
+
+  // 搜索过滤
+  if (studentSearch) {
+    var kw = studentSearch.toLowerCase();
+    students = students.filter(function(s) { return s.name.toLowerCase().indexOf(kw) !== -1 || (s.phone || '').indexOf(kw) !== -0; });
   }
 
-  if (students.length === 0) {
+  // 分页
+  var totalStudents = students.length;
+  var totalPages = Math.ceil(totalStudents / STUDENT_PAGE_SIZE);
+  if (studentPage > totalPages) studentPage = totalPages || 1;
+  if (studentPage < 1) studentPage = 1;
+  var paged = students.slice((studentPage - 1) * STUDENT_PAGE_SIZE, studentPage * STUDENT_PAGE_SIZE);
+
+  if (totalStudents === 0) {
     return '<p style="color:#7f8c8d;text-align:center;padding:20px;">暂无学生，点击「添加学生」录入</p>';
   }
 
-  let html = `
+  // 搜索栏
+  var html = '<div style="margin-bottom:10px;display:flex;gap:8px;align-items:center;"><input type="text" id="studentSearchInput" placeholder="🔍 搜索姓名/电话..." value="' + htmlEncode(studentSearch) + '" style="flex:1;max-width:300px;padding:6px 12px;border-radius:6px;border:1px solid #ddd;" /><span style="font-size:0.85rem;color:var(--text-light);">共 ' + totalStudents + ' 人</span></div>';
+
+  html += `
     <div style="overflow-x:auto;">
       <table style="width:100%;border-collapse:collapse;font-size:0.9rem;">
         <thead>
@@ -54,15 +78,15 @@ function renderStudentList() {
         <tbody>
   `;
 
-  students.forEach(s => {
-    const className = getClassName(s.classId, data);
+  paged.forEach(function(s) {
+    var className = getClassName(s.classId, data);
     html += `
       <tr>
-        <td style="padding:10px 12px;border-bottom:1px solid #eee;white-space:nowrap;">${s.name}</td>
-        <td style="padding:10px 12px;border-bottom:1px solid #eee;white-space:nowrap;">${className}</td>
-        <td style="padding:10px 12px;border-bottom:1px solid #eee;white-space:nowrap;">${s.phone || '-'}</td>
-        <td style="padding:10px 12px;border-bottom:1px solid #eee;">${s.address || '-'}</td>
-        <td style="padding:10px 12px;border-bottom:1px solid #eee;">${s.notes || '-'}</td>
+        <td style="padding:10px 12px;border-bottom:1px solid #eee;white-space:nowrap;">${htmlEncode(s.name)}</td>
+        <td style="padding:10px 12px;border-bottom:1px solid #eee;white-space:nowrap;">${htmlEncode(className)}</td>
+        <td style="padding:10px 12px;border-bottom:1px solid #eee;white-space:nowrap;">${htmlEncode(s.phone || '-')}</td>
+        <td style="padding:10px 12px;border-bottom:1px solid #eee;">${htmlEncode(s.address || '-')}</td>
+        <td style="padding:10px 12px;border-bottom:1px solid #eee;">${htmlEncode(s.notes || '-')}</td>
         <td style="padding:10px 12px;border-bottom:1px solid #eee;white-space:nowrap;">
           <button class="edit-student-btn" data-id="${s.id}" style="background:none;border:none;color:#4a6fa5;cursor:pointer;font-size:0.9rem;">✏️</button>
           <button class="del-student-btn" data-id="${s.id}" style="background:none;border:none;color:#dc3545;cursor:pointer;font-size:0.9rem;">🗑️</button>
@@ -72,16 +96,34 @@ function renderStudentList() {
   });
 
   html += '</tbody></table></div>';
+
+  // 分页器（仅多页时显示）
+  if (totalPages > 1) {
+    html += '<div style="display:flex;justify-content:center;align-items:center;gap:8px;margin-top:12px;font-size:0.85rem;">';
+    html += '<button class="btn" id="prevPageBtn" style="padding:4px 12px;' + (studentPage <= 1 ? 'opacity:0.4;pointer-events:none;' : '') + '">◀ 上一页</button>';
+    html += '<span>第 ' + studentPage + ' / ' + totalPages + ' 页</span>';
+    html += '<button class="btn" id="nextPageBtn" style="padding:4px 12px;' + (studentPage >= totalPages ? 'opacity:0.4;pointer-events:none;' : '') + '">下一页 ▶</button>';
+    html += '</div>';
+  }
+
   return html;
 }
 
 // ========== 添加学生弹窗 ==========
 function showStudentForm(studentId) {
-  const data = loadClassData();
-  const student = studentId ? data.students.find(s => s.id === studentId) : null;
-  const isEdit = !!student;
+  var data = loadClassData();
 
-  const formData = {
+  // 无班级时拦截
+  if (data.classes.length === 0 && !studentId) {
+    alert('请先添加班级，再录入学生');
+    showClassForm(null);
+    return;
+  }
+
+  var student = studentId ? data.students.find(function(s) { return s.id === studentId; }) : null;
+  var isEdit = !!student;
+
+  var formData = {
     name: student?.name || '',
     classId: student?.classId || (data.classes[0]?.id || ''),
     gender: student?.gender || '男',
@@ -91,44 +133,44 @@ function showStudentForm(studentId) {
     notes: student?.notes || ''
   };
 
-  const overlay = document.createElement('div');
+  var overlay = document.createElement('div');
   overlay.className = 'modal-overlay';
   overlay.innerHTML = `
     <div class="modal-box">
       <h3>${isEdit ? '编辑学生' : '添加学生'}</h3>
       <div class="form-group">
         <label>姓名 *</label>
-        <input type="text" id="formStudentName" value="${formData.name}" />
+        <input type="text" id="formStudentName" value="${htmlEncode(formData.name)}" />
       </div>
       <div class="form-group">
         <label>班级</label>
         <select id="formStudentClass">
-          ${data.classes.map(c => `<option value="${c.id}" ${c.id===formData.classId?'selected':''}>${c.name}</option>`).join('')}
+          ${data.classes.map(function(c) { return '<option value="' + c.id + '"' + (c.id===formData.classId?' selected':'') + '>' + htmlEncode(c.name) + '</option>'; }).join('')}
         </select>
       </div>
       <div class="form-row">
         <div class="form-group">
           <label>性别</label>
           <select id="formStudentGender">
-            ${['男','女'].map(v => `<option ${v===formData.gender?'selected':''}>${v}</option>`).join('')}
+            ${['男','女'].map(function(v) { return '<option' + (v===formData.gender?' selected':'') + '>' + v + '</option>'; }).join('')}
           </select>
         </div>
         <div class="form-group">
           <label>联系电话</label>
-          <input type="text" id="formStudentPhone" value="${formData.phone}" />
+          <input type="text" id="formStudentPhone" value="${htmlEncode(formData.phone)}" />
         </div>
       </div>
       <div class="form-group">
         <label>家长电话</label>
-        <input type="text" id="formStudentParentPhone" value="${formData.parentPhone}" />
+        <input type="text" id="formStudentParentPhone" value="${htmlEncode(formData.parentPhone)}" />
       </div>
       <div class="form-group">
         <label>家庭地址</label>
-        <input type="text" id="formStudentAddress" value="${formData.address}" />
+        <input type="text" id="formStudentAddress" value="${htmlEncode(formData.address)}" />
       </div>
       <div class="form-group">
         <label>备注</label>
-        <textarea id="formStudentNotes" rows="2">${formData.notes}</textarea>
+        <textarea id="formStudentNotes" rows="2">${htmlEncode(formData.notes)}</textarea>
       </div>
       <div class="modal-actions">
         <button class="btn" id="saveStudentBtn">${isEdit ? '更新' : '添加'}</button>
@@ -140,13 +182,13 @@ function showStudentForm(studentId) {
   document.body.appendChild(overlay);
 
   document.getElementById('saveStudentBtn').addEventListener('click', function() {
-    const name = document.getElementById('formStudentName').value.trim();
+    var name = document.getElementById('formStudentName').value.trim();
     if (!name) { alert('请输入学生姓名'); return; }
 
-    const data = loadClassData();
-    const newStudent = {
+    var data = loadClassData();
+    var newStudent = {
       id: studentId || generateId(),
-      name,
+      name: name,
       classId: document.getElementById('formStudentClass').value,
       gender: document.getElementById('formStudentGender').value,
       phone: document.getElementById('formStudentPhone').value.trim(),
@@ -156,7 +198,7 @@ function showStudentForm(studentId) {
     };
 
     if (isEdit) {
-      const idx = data.students.findIndex(s => s.id === studentId);
+      var idx = data.students.findIndex(function(s) { return s.id === studentId; });
       if (idx !== -1) data.students[idx] = newStudent;
     } else {
       data.students.push(newStudent);
@@ -176,11 +218,11 @@ function showStudentForm(studentId) {
 
 // ========== 添加/编辑班级弹窗 ==========
 function showClassForm(classId) {
-  const data = loadClassData();
-  const cls = classId ? data.classes.find(c => c.id === classId) : null;
-  const isEdit = !!cls;
+  var data = loadClassData();
+  var cls = classId ? data.classes.find(function(c) { return c.id === classId; }) : null;
+  var isEdit = !!cls;
 
-  const overlay = document.createElement('div');
+  var overlay = document.createElement('div');
   overlay.className = 'modal-overlay';
   overlay.innerHTML = `
     <div class="modal-box">
@@ -201,21 +243,20 @@ function showClassForm(classId) {
   `;
   document.body.appendChild(overlay);
 
-  // 编辑态回填（避免属性转义问题，采用赋值方式）
   if (cls) {
     document.getElementById('formClassName').value = cls.name || '';
     document.getElementById('formClassGrade').value = cls.grade || '';
   }
 
   document.getElementById('saveClassBtn').addEventListener('click', function() {
-    const name = document.getElementById('formClassName').value.trim();
+    var name = document.getElementById('formClassName').value.trim();
     if (!name) { alert('请输入班级名称'); return; }
-    const grade = document.getElementById('formClassGrade').value.trim();
+    var grade = document.getElementById('formClassGrade').value.trim();
     if (isEdit) {
       cls.name = name;
       cls.grade = grade;
     } else {
-      data.classes.push({ id: generateId(), name: name, grade: grade || name.substring(0, 2), studentCount: 0 });
+      data.classes.push({ id: generateId(), name: name, grade: grade || name.substring(0, 2) });
     }
     saveClassData(data);
     document.body.removeChild(overlay);
@@ -233,11 +274,11 @@ function showClassForm(classId) {
 
 // ========== 班级管理（列表 + 编辑/删除） ==========
 function showClassManage() {
-  const data = loadClassData();
-  const overlay = document.createElement('div');
+  var data = loadClassData();
+  var overlay = document.createElement('div');
   overlay.className = 'modal-overlay';
-  let clsRows = data.classes.map(c => {
-    const cnt = data.students.filter(s => s.classId === c.id).length;
+  var clsRows = data.classes.map(function(c) {
+    var cnt = data.students.filter(function(s) { return s.classId === c.id; }).length;
     return `
       <div style="display:flex;align-items:center;justify-content:space-between;padding:8px 0;border-bottom:1px solid #eee;">
         <span>${htmlEncode(c.name)} <span style="color:var(--text-light);font-size:0.8rem;">（${cnt} 人${c.grade ? ' · ' + htmlEncode(c.grade) : ''}）</span></span>
@@ -260,19 +301,17 @@ function showClassManage() {
   `;
   document.body.appendChild(overlay);
 
-  overlay.querySelectorAll('.edit-class-btn').forEach(b => {
+  overlay.querySelectorAll('.edit-class-btn').forEach(function(b) {
     b.onclick = function() { document.body.removeChild(overlay); showClassForm(this.dataset.id); };
   });
-  overlay.querySelectorAll('.del-class-btn').forEach(b => {
+  overlay.querySelectorAll('.del-class-btn').forEach(function(b) {
     b.onclick = function() {
-      const id = this.dataset.id;
-      const c = data.classes.find(x => x.id === id);
+      var id = this.dataset.id;
+      var c = data.classes.find(function(x) { return x.id === id; });
       if (!c) return;
-      const cnt = data.students.filter(s => s.classId === id).length;
-      if (!confirm(`确认删除班级「${c.name}」？${cnt ? `该班级下 ${cnt} 名学生将一并删除，且不可恢复。` : ''}`)) return;
-      data.classes = data.classes.filter(x => x.id !== id);
-      data.students = data.students.filter(s => s.classId !== id);
-      saveClassData(data);
+      var cnt = data.students.filter(function(s) { return s.classId === id; }).length;
+      if (!confirm('确认删除班级「' + c.name + '」？' + (cnt ? '该班级下 ' + cnt + ' 名学生及关联的考勤/成绩记录将一并删除，且不可恢复。' : ''))) return;
+      cascadeDeleteClass(id);  // 级联删除
       document.body.removeChild(overlay);
       refreshClassView();
       syncClassFilter();
@@ -289,19 +328,18 @@ function showClassManage() {
   });
 }
 
-// 同步班级筛选下拉（添加/编辑/删除班级后调用）
+// 同步班级筛选下拉
 function syncClassFilter() {
-  const filter = document.getElementById('classFilter');
+  var filter = document.getElementById('classFilter');
   if (!filter) return;
-  const data = loadClassData();
-  filter.innerHTML = `<option value="">全部班级</option>${data.classes.map(c => `<option value="${c.id}">${c.name}</option>`).join('')}`;
+  filter.innerHTML = renderClassOptions(filter.value);
 }
 
 // ========== 新增请假弹窗 ==========
 function showLeaveForm() {
-  const data = loadClassData();
+  var data = loadClassData();
   if (data.students.length === 0) { alert('请先在「添加学生」中录入学生'); return; }
-  const overlay = document.createElement('div');
+  var overlay = document.createElement('div');
   overlay.className = 'modal-overlay';
   overlay.innerHTML = `
     <div class="modal-box">
@@ -309,7 +347,7 @@ function showLeaveForm() {
       <div class="form-group">
         <label>学生 *</label>
         <select id="formLeaveStudent">
-          ${data.students.map(s => `<option value="${s.id}">${htmlEncode(s.name)}（${htmlEncode(getClassName(s.classId, data))}）</option>`).join('')}
+          ${data.students.map(function(s) { return '<option value="' + s.id + '">' + htmlEncode(s.name) + '（' + htmlEncode(getClassName(s.classId, data)) + '）</option>'; }).join('')}
         </select>
       </div>
       <div class="form-group">
@@ -342,24 +380,24 @@ function showLeaveForm() {
   document.body.appendChild(overlay);
 
   document.getElementById('saveLeaveBtn').addEventListener('click', function() {
-    const studentId = document.getElementById('formLeaveStudent').value;
-    const type = document.getElementById('formLeaveType').value;
-    const reason = document.getElementById('formLeaveReason').value.trim();
-    const date = document.getElementById('formLeaveDate').value || new Date().toISOString().slice(0, 10);
-    const duration = document.getElementById('formLeaveDuration').value.trim();
-    const attData = loadAttendance();
-    attData.records.push({
+    var studentId = document.getElementById('formLeaveStudent').value;
+    var type = document.getElementById('formLeaveType').value;
+    var reason = document.getElementById('formLeaveReason').value.trim();
+    var date = document.getElementById('formLeaveDate').value || new Date().toISOString().slice(0, 10);
+    var duration = document.getElementById('formLeaveDuration').value.trim();
+    var attData = loadAttendance();
+    attData.leaves.push({
       id: generateId(),
-      studentId,
-      date,
-      type,
-      reason: `${reason}${duration ? ' (时长: ' + duration + ')' : ''}`,
+      studentId: studentId,
+      date: date,
+      type: type,
+      reason: reason + (duration ? ' (时长: ' + duration + ')' : ''),
       status: '申请中',
       createdAt: Date.now()
     });
     saveAttendance(attData);
     document.body.removeChild(overlay);
-    const leaveList = document.getElementById('leaveList');
+    var leaveList = document.getElementById('leaveList');
     if (leaveList) { leaveList.innerHTML = renderLeaveList(); bindLeaveEvents(); }
     alert('✅ 请假申请已提交！');
   });
@@ -374,20 +412,19 @@ function showLeaveForm() {
 
 // ========== 考勤管理 ==========
 function renderAttendance() {
-  const data = loadClassData();
-  const attData = loadAttendance();
-  const today = new Date().toISOString().slice(0, 10);
+  var data = loadClassData();
+  var today = new Date().toISOString().slice(0, 10);
 
-  let html = `
+  var html = `
     <div class="card">
       <h3>📋 今日考勤</h3>
-      <div style="display:flex;gap:12px;flex-wrap:wrap;margin-bottom:12px;">
+      <div style="display:flex;gap:12px;flex-wrap:wrap;margin-bottom:12px;" class="attendance-toolbar">
         <input type="date" id="attDate" value="${today}" style="padding:6px 12px;border-radius:6px;border:1px solid #ddd;" />
         <select id="attClassFilter" style="padding:6px 12px;border-radius:6px;border:1px solid #ddd;">
-          <option value="">全部班级</option>
-          ${data.classes.map(c => `<option value="${c.id}">${c.name}</option>`).join('')}
+          ${renderClassOptions('')}
         </select>
         <button class="btn" id="attSaveBtn">💾 保存考勤</button>
+        <button class="btn" id="attHistoryBtn" style="background:#17a2b8;">📅 考勤历史</button>
         <button class="btn" id="attBackBtn" style="background:#6c757d;">返回</button>
       </div>
       <div id="attendanceList">
@@ -399,18 +436,26 @@ function renderAttendance() {
 }
 
 function renderAttendanceTable() {
-  const data = loadClassData();
-  const attData = loadAttendance();
-  const date = document.getElementById('attDate')?.value || new Date().toISOString().slice(0, 10);
-  const filter = document.getElementById('attClassFilter')?.value || '';
-  let students = data.students;
-  if (filter) students = students.filter(s => s.classId === filter);
+  var data = loadClassData();
+  var attData = loadAttendance();
+  var date = document.getElementById('attDate')?.value || new Date().toISOString().slice(0, 10);
+  var filter = document.getElementById('attClassFilter')?.value || '';
+  var students = data.students;
+  if (filter) students = students.filter(function(s) { return s.classId === filter; });
+
+  // 考勤姓名搜索
+  var attSearchEl = document.getElementById('attSearchInput');
+  var attSearch = attSearchEl ? attSearchEl.value.trim().toLowerCase() : '';
+  if (attSearch) students = students.filter(function(s) { return s.name.toLowerCase().indexOf(attSearch) !== -1; });
 
   if (students.length === 0) {
     return '<p style="color:#7f8c8d;text-align:center;padding:20px;">该班级暂无学生</p>';
   }
 
-  let html = `
+  // 搜索栏
+  var html = '<div style="margin-bottom:8px;"><input type="text" id="attSearchInput" placeholder="🔍 按姓名搜索..." value="' + (attSearchEl ? htmlEncode(attSearchEl.value) : '') + '" style="width:240px;padding:5px 10px;border-radius:4px;border:1px solid #ddd;" /></div>';
+
+  html += `
     <div style="overflow-x:auto;">
       <table style="width:100%;border-collapse:collapse;font-size:0.9rem;">
         <thead>
@@ -424,23 +469,24 @@ function renderAttendanceTable() {
         <tbody>
   `;
 
-  students.forEach(s => {
-    const existing = attData.records.find(r => r.studentId === s.id && r.date === date);
-    const status = existing ? existing.type : '正常';
-    const reason = existing ? existing.reason || '' : '';
-    const className = getClassName(s.classId, data);
+  students.forEach(function(s) {
+    // 从 attendance 数组查找当天的异常记录（正常=无记录）
+    var existing = attData.attendance.find(function(r) { return r.studentId === s.id && r.date === date; });
+    var status = existing ? existing.type : '正常';
+    var reason = existing ? (existing.reason || '') : '';
+    var className = getClassName(s.classId, data);
 
     html += `
       <tr>
-        <td style="padding:8px;border-bottom:1px solid #eee;">${s.name}</td>
-        <td style="padding:8px;border-bottom:1px solid #eee;">${className}</td>
+        <td style="padding:8px;border-bottom:1px solid #eee;">${htmlEncode(s.name)}</td>
+        <td style="padding:8px;border-bottom:1px solid #eee;">${htmlEncode(className)}</td>
         <td style="padding:8px;border-bottom:1px solid #eee;">
           <select class="att-status-select" data-student="${s.id}" style="padding:4px 8px;border-radius:4px;border:1px solid #ddd;">
-            ${['正常','缺课','迟到','事假','病假'].map(v => `<option ${v===status?'selected':''}>${v}</option>`).join('')}
+            ${['正常','缺课','迟到'].map(function(v) { return '<option' + (v===status?' selected':'') + '>' + v + '</option>'; }).join('')}
           </select>
         </td>
         <td style="padding:8px;border-bottom:1px solid #eee;">
-          <input type="text" class="att-reason-input" data-student="${s.id}" value="${reason}" placeholder="原因" style="width:100%;padding:4px 8px;border-radius:4px;border:1px solid #ddd;" />
+          <input type="text" class="att-reason-input" data-student="${s.id}" value="${htmlEncode(reason)}" placeholder="原因" style="width:100%;padding:4px 8px;border-radius:4px;border:1px solid #ddd;" />
         </td>
       </tr>
     `;
@@ -450,12 +496,121 @@ function renderAttendanceTable() {
   return html;
 }
 
+// ========== 考勤历史查询 ==========
+function renderAttendanceHistory() {
+  var data = loadClassData();
+  var attData = loadAttendance();
+  var today = new Date().toISOString().slice(0, 10);
+
+  var html = `
+    <div class="card">
+      <h3>📅 考勤历史</h3>
+      <div style="display:flex;gap:12px;flex-wrap:wrap;margin-bottom:12px;" class="attendance-toolbar">
+        <div style="display:flex;align-items:center;gap:4px;">
+          <label>日期：</label>
+          <input type="date" id="histDateFrom" value="${today}" style="padding:6px 10px;border-radius:6px;border:1px solid #ddd;" />
+          <span>~</span>
+          <input type="date" id="histDateTo" value="${today}" style="padding:6px 10px;border-radius:6px;border:1px solid #ddd;" />
+        </div>
+        <select id="histClassFilter" style="padding:6px 12px;border-radius:6px;border:1px solid #ddd;">
+          ${renderClassOptions('')}
+        </select>
+        <button class="btn" id="histQueryBtn">🔍 查询</button>
+        <button class="btn" id="histBackBtn" style="background:#6c757d;">← 返回考勤录入</button>
+      </div>
+      <div id="historyContent">${renderHistoryTable()}</div>
+    </div>
+  `;
+  return html;
+}
+
+function renderHistoryTable() {
+  var data = loadClassData();
+  var attData = loadAttendance();
+  var dateFrom = document.getElementById('histDateFrom')?.value || '';
+  var dateTo = document.getElementById('histDateTo')?.value || '';
+  var classFilter = document.getElementById('histClassFilter')?.value || '';
+
+  // 筛选考勤异常记录
+  var records = attData.attendance.filter(function(r) {
+    if (dateFrom && r.date < dateFrom) return false;
+    if (dateTo && r.date > dateTo) return false;
+    if (classFilter) {
+      var s = data.students.find(function(st) { return st.id === r.studentId; });
+      if (!s || s.classId !== classFilter) return false;
+    }
+    return true;
+  });
+
+  // 统计汇总
+  var absentCount = records.filter(function(r) { return r.type === '缺课'; }).length;
+  var lateCount = records.filter(function(r) { return r.type === '迟到'; }).length;
+
+  var html = '<div style="display:flex;gap:16px;margin-bottom:12px;font-size:0.9rem;">';
+  html += '<span style="background:#f8d7da;padding:6px 14px;border-radius:20px;">缺课：<strong>' + absentCount + '</strong> 次</span>';
+  html += '<span style="background:#fff3cd;padding:6px 14px;border-radius:20px;">迟到：<strong>' + lateCount + '</strong> 次</span>';
+  html += '<span style="color:var(--text-light);">共 ' + records.length + ' 条异常记录</span>';
+  html += '</div>';
+
+  if (records.length === 0) {
+    html += '<p style="color:#7f8c8d;text-align:center;padding:20px;">所选时间段无异常考勤记录</p>';
+    return html;
+  }
+
+  html += `
+    <div style="overflow-x:auto;">
+      <table style="width:100%;border-collapse:collapse;font-size:0.9rem;">
+        <thead>
+          <tr style="background:#f0f4f8;">
+            <th style="padding:8px;text-align:left;border-bottom:2px solid #ddd;">学生</th>
+            <th style="padding:8px;text-align:left;border-bottom:2px solid #ddd;">班级</th>
+            <th style="padding:8px;text-align:left;border-bottom:2px solid #ddd;">日期</th>
+            <th style="padding:8px;text-align:left;border-bottom:2px solid #ddd;">类别</th>
+            <th style="padding:8px;text-align:left;border-bottom:2px solid #ddd;">原因</th>
+          </tr>
+        </thead>
+        <tbody>
+  `;
+
+  records.forEach(function(r) {
+    var s = data.students.find(function(st) { return st.id === r.studentId; });
+    html += `
+      <tr>
+        <td style="padding:8px;border-bottom:1px solid #eee;">${s ? htmlEncode(s.name) : '未知'}</td>
+        <td style="padding:8px;border-bottom:1px solid #eee;">${s ? htmlEncode(getClassName(s.classId, data)) : '-'}</td>
+        <td style="padding:8px;border-bottom:1px solid #eee;">${r.date}</td>
+        <td style="padding:8px;border-bottom:1px solid #eee;"><span style="padding:2px 10px;border-radius:30px;font-size:0.8rem;background:${r.type==='缺课'?'#f8d7da':'#fff3cd'};">${r.type}</span></td>
+        <td style="padding:8px;border-bottom:1px solid #eee;">${htmlEncode(r.reason || '-')}</td>
+      </tr>
+    `;
+  });
+
+  html += '</tbody></table></div>';
+  return html;
+}
+
+function bindAttendanceHistoryEvents() {
+  document.getElementById('histBackBtn').addEventListener('click', function() {
+    document.getElementById('classContent').innerHTML = renderAttendance();
+    bindAttendanceEvents();
+  });
+
+  document.getElementById('histQueryBtn').addEventListener('click', function() {
+    document.getElementById('historyContent').innerHTML = renderHistoryTable();
+  });
+
+  // 日期/班级变化自动刷新
+  ['histDateFrom','histDateTo','histClassFilter'].forEach(function(id) {
+    var el = document.getElementById(id);
+    if (el) el.addEventListener('change', function() { document.getElementById('historyContent').innerHTML = renderHistoryTable(); });
+  });
+}
+
 // ========== 请假管理 ==========
 function renderLeave() {
-  const data = loadClassData();
-  const attData = loadAttendance();
+  var data = loadClassData();
 
-  let html = `
+  var html = `
     <div class="card">
       <h3>📝 请假管理</h3>
       <div style="display:flex;gap:12px;flex-wrap:wrap;margin-bottom:12px;">
@@ -478,19 +633,19 @@ function renderLeave() {
 }
 
 function renderLeaveList() {
-  const data = loadClassData();
-  const attData = loadAttendance();
-  const filter = document.getElementById('leaveStatusFilter')?.value || '';
+  var data = loadClassData();
+  var attData = loadAttendance();
+  var filter = document.getElementById('leaveStatusFilter')?.value || '';
 
-  const leaves = attData.records.filter(r => r.type === '事假' || r.type === '病假');
-  let filtered = leaves;
-  if (filter) filtered = leaves.filter(r => (r.status || '已批准') === filter);
+  var leaves = attData.leaves;
+  var filtered = leaves;
+  if (filter) filtered = leaves.filter(function(r) { return (r.status || '已批准') === filter; });
 
   if (filtered.length === 0) {
     return '<p style="color:#7f8c8d;text-align:center;padding:20px;">暂无请假记录</p>';
   }
 
-  let html = `
+  var html = `
     <div style="overflow-x:auto;">
       <table style="width:100%;border-collapse:collapse;font-size:0.9rem;">
         <thead>
@@ -506,21 +661,21 @@ function renderLeaveList() {
         <tbody>
   `;
 
-  filtered.forEach(r => {
-    const studentName = getStudentName(r.studentId, data);
-    const status = r.status || '已批准';
+  filtered.forEach(function(r) {
+    var studentName = getStudentName(r.studentId, data);
+    var status = r.status || '已批准';
     html += `
       <tr>
-        <td style="padding:8px;border-bottom:1px solid #eee;">${studentName}</td>
+        <td style="padding:8px;border-bottom:1px solid #eee;">${htmlEncode(studentName)}</td>
         <td style="padding:8px;border-bottom:1px solid #eee;">${r.date}</td>
         <td style="padding:8px;border-bottom:1px solid #eee;">${r.type}</td>
-        <td style="padding:8px;border-bottom:1px solid #eee;">${r.reason || '-'}</td>
+        <td style="padding:8px;border-bottom:1px solid #eee;">${htmlEncode(r.reason || '-')}</td>
         <td style="padding:8px;border-bottom:1px solid #eee;">
           <span style="padding:2px 12px;border-radius:30px;font-size:0.8rem;background:${status==='已批准'?'#d4edda':status==='申请中'?'#fff3cd':'#f8d7da'};color:${status==='已批准'?'#155724':status==='申请中'?'#856404':'#721c24'};">${status}</span>
         </td>
         <td style="padding:8px;border-bottom:1px solid #eee;">
-          ${status === '申请中' ? `<button class="approve-leave-btn" data-id="${r.id}" style="background:none;border:none;color:#28a745;cursor:pointer;">✅ 批准</button>` : ''}
-          ${status === '已批准' ? `<button class="finish-leave-btn" data-id="${r.id}" style="background:none;border:none;color:#4a6fa5;cursor:pointer;">📌 销假</button>` : ''}
+          ${status === '申请中' ? '<button class="approve-leave-btn" data-id="' + r.id + '" style="background:none;border:none;color:#28a745;cursor:pointer;">✅ 批准</button>' : ''}
+          ${status === '已批准' ? '<button class="finish-leave-btn" data-id="' + r.id + '" style="background:none;border:none;color:#4a6fa5;cursor:pointer;">📌 销假</button>' : ''}
         </td>
       </tr>
     `;
@@ -532,7 +687,7 @@ function renderLeaveList() {
 
 // ========== 刷新视图 ==========
 function refreshClassView() {
-  const container = document.getElementById('classContent');
+  var container = document.getElementById('classContent');
   if (container) {
     container.innerHTML = renderStudentList();
     bindClassEvents();
@@ -542,22 +697,37 @@ function refreshClassView() {
 // ========== 绑定事件 ==========
 function bindClassEvents() {
   // 编辑学生
-  document.querySelectorAll('.edit-student-btn').forEach(btn => {
-    btn.onclick = function() {
-      showStudentForm(this.dataset.id);
-    };
+  document.querySelectorAll('.edit-student-btn').forEach(function(btn) {
+    btn.onclick = function() { showStudentForm(this.dataset.id); };
   });
 
-  // 删除学生
-  document.querySelectorAll('.del-student-btn').forEach(btn => {
+  // 删除学生（使用级联删除）
+  document.querySelectorAll('.del-student-btn').forEach(function(btn) {
     btn.onclick = function() {
-      if (!confirm('确认删除该学生？')) return;
-      const data = loadClassData();
-      data.students = data.students.filter(s => s.id !== this.dataset.id);
+      if (!confirm('确认删除该学生？关联的考勤和成绩记录将一并删除。')) return;
+      cascadeDeleteStudent(this.dataset.id);
+      var data = loadClassData();
+      data.students = data.students.filter(function(s) { return s.id !== this.dataset.id; }.bind(this));
       saveClassData(data);
       refreshClassView();
-    };
+    }.bind(btn);
   });
+
+  // 搜索
+  var searchInput = document.getElementById('studentSearchInput');
+  if (searchInput) {
+    searchInput.addEventListener('input', function() {
+      studentSearch = this.value;
+      studentPage = 1;
+      refreshClassView();
+    });
+  }
+
+  // 分页
+  var prevBtn = document.getElementById('prevPageBtn');
+  var nextBtn = document.getElementById('nextPageBtn');
+  if (prevBtn) prevBtn.addEventListener('click', function() { studentPage--; refreshClassView(); });
+  if (nextBtn) nextBtn.addEventListener('click', function() { studentPage++; refreshClassView(); });
 }
 
 // ========== 初始化 ==========
@@ -567,18 +737,21 @@ function initClass() {
     showStudentForm(null);
   });
 
-  // 添加班级（模态表单）
+  // 添加班级
   document.getElementById('addClassBtn').addEventListener('click', function() {
     showClassForm(null);
   });
 
-  // 管理班级（编辑 / 删除 / 查看）
+  // 管理班级
   document.getElementById('manageClassBtn').addEventListener('click', function() {
     showClassManage();
   });
 
   // 班级筛选
-  document.getElementById('classFilter').addEventListener('change', refreshClassView);
+  document.getElementById('classFilter').addEventListener('change', function() {
+    studentPage = 1;
+    refreshClassView();
+  });
 
   // 考勤管理
   document.getElementById('attendanceBtn').addEventListener('click', function() {
@@ -592,15 +765,37 @@ function initClass() {
     bindLeaveEvents();
   });
 
-  // 导出
-  document.getElementById('exportClassBtn').addEventListener('click', function() {
-    const data = loadClassData();
-    const text = JSON.stringify(data, null, 2);
-    const blob = new Blob([text], { type: 'application/json' });
-    const a = document.createElement('a');
-    a.href = URL.createObjectURL(blob);
-    a.download = `班级数据_${new Date().toISOString().slice(0,10)}.json`;
-    a.click();
+  // Excel 导出
+  document.getElementById('exportExcelBtn').addEventListener('click', function() {
+    exportClassExcel(true);
+  });
+
+  // 下载模板
+  document.getElementById('downloadTemplateBtn').addEventListener('click', function() {
+    exportClassExcel(false);
+  });
+
+  // 导入恢复（单次绑定，干净闭包）
+  document.getElementById('importFileInput').addEventListener('change', function(e) {
+    var f = e.target.files[0];
+    if (!f) return;
+    var ext = f.name.split('.').pop().toLowerCase();
+    var rdr = new FileReader();
+    rdr.onload = function(evt) {
+      try {
+        if (ext === 'json') {
+          if (!confirm('⚠️ 即将覆盖当前所有班级数据，确定？')) return;
+          if (parseClassJson(JSON.parse(evt.target.result))) { alert('✅ 导入成功！刷新...'); location.reload(); }
+        } else if (ext === 'xlsx' || ext === 'xls') {
+          if (!confirm('⚠️ 即将覆盖当前所有班级数据，确定？')) return;
+          if (parseClassWorkbook(XLSX.read(evt.target.result, { type: 'binary' }))) { alert('✅ 导入成功！刷新...'); location.reload(); }
+        } else {
+          alert('❌ 不支持的文件格式，请上传 .xlsx 或 .json 文件');
+        }
+      } catch(err) { alert('❌ 解析失败：' + err.message); }
+      e.target.value = '';
+    };
+    if (ext === 'json') rdr.readAsText(f); else rdr.readAsBinaryString(f);
   });
 
   bindClassEvents();
@@ -613,33 +808,46 @@ function bindAttendanceEvents() {
     bindClassEvents();
   });
 
+  // 考勤历史
+  document.getElementById('attHistoryBtn').addEventListener('click', function() {
+    document.getElementById('classContent').innerHTML = renderAttendanceHistory();
+    bindAttendanceHistoryEvents();
+  });
+
   document.getElementById('attSaveBtn').addEventListener('click', function() {
-    const date = document.getElementById('attDate').value;
-    const attData = loadAttendance();
-    document.querySelectorAll('.att-status-select').forEach(sel => {
-      const studentId = sel.dataset.student;
-      const status = sel.value;
-      const reasonInput = document.querySelector(`.att-reason-input[data-student="${studentId}"]`);
-      const reason = reasonInput ? reasonInput.value : '';
-      const existing = attData.records.find(r => r.studentId === studentId && r.date === date);
-      if (existing) {
-        existing.type = status;
-        existing.reason = reason;
-        existing.updatedAt = Date.now();
+    var date = document.getElementById('attDate').value;
+    var attData = loadAttendance();
+    document.querySelectorAll('.att-status-select').forEach(function(sel) {
+      var studentId = sel.dataset.student;
+      var status = sel.value;
+      var reasonInput = document.querySelector('.att-reason-input[data-student="' + studentId + '"]');
+      var reason = reasonInput ? reasonInput.value : '';
+
+      if (status === '正常') {
+        // 正常 = 删除该生当日异常记录（不存）
+        attData.attendance = attData.attendance.filter(function(r) { return !(r.studentId === studentId && r.date === date); });
       } else {
-        attData.records.push({
+        // 异常 = 更新或新增
+        var existingIdx = attData.attendance.findIndex(function(r) { return r.studentId === studentId && r.date === date; });
+        var record = {
           id: generateId(),
-          studentId,
-          date,
+          studentId: studentId,
+          date: date,
           type: status,
-          reason,
-          status: status === '事假' || status === '病假' ? '已批准' : undefined,
+          reason: reason,
           createdAt: Date.now()
-        });
+        };
+        if (existingIdx !== -1) {
+          record.id = attData.attendance[existingIdx].id;
+          record.createdAt = attData.attendance[existingIdx].createdAt;
+          attData.attendance[existingIdx] = record;
+        } else {
+          attData.attendance.push(record);
+        }
       }
     });
     saveAttendance(attData);
-    alert('✅ 考勤已保存！');
+    alert('✅ 考勤已保存！（仅保存异常记录，正常=无记录）');
   });
 
   document.getElementById('attDate').addEventListener('change', function() {
@@ -648,6 +856,13 @@ function bindAttendanceEvents() {
 
   document.getElementById('attClassFilter').addEventListener('change', function() {
     document.getElementById('attendanceList').innerHTML = renderAttendanceTable();
+  });
+
+  // 考勤搜索（事件委托）
+  document.getElementById('attendanceList').addEventListener('input', function(e) {
+    if (e.target.id === 'attSearchInput') {
+      document.getElementById('attendanceList').innerHTML = renderAttendanceTable();
+    }
   });
 }
 
@@ -668,10 +883,10 @@ function bindLeaveEvents() {
   });
 
   // 批准请假
-  document.querySelectorAll('.approve-leave-btn').forEach(btn => {
+  document.querySelectorAll('.approve-leave-btn').forEach(function(btn) {
     btn.onclick = function() {
-      const attData = loadAttendance();
-      const record = attData.records.find(r => r.id === this.dataset.id);
+      var attData = loadAttendance();
+      var record = attData.leaves.find(function(r) { return r.id === this.dataset.id; }.bind(this));
       if (record) {
         record.status = '已批准';
         record.approvedAt = Date.now();
@@ -680,14 +895,14 @@ function bindLeaveEvents() {
         bindLeaveEvents();
         alert('✅ 请假已批准！');
       }
-    };
+    }.bind(btn);
   });
 
   // 销假
-  document.querySelectorAll('.finish-leave-btn').forEach(btn => {
+  document.querySelectorAll('.finish-leave-btn').forEach(function(btn) {
     btn.onclick = function() {
-      const attData = loadAttendance();
-      const record = attData.records.find(r => r.id === this.dataset.id);
+      var attData = loadAttendance();
+      var record = attData.leaves.find(function(r) { return r.id === this.dataset.id; }.bind(this));
       if (record) {
         record.status = '已销假';
         record.finishedAt = Date.now();
@@ -696,7 +911,7 @@ function bindLeaveEvents() {
         bindLeaveEvents();
         alert('✅ 已销假！');
       }
-    };
+    }.bind(btn);
   });
 }
 

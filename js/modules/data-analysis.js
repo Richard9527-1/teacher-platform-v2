@@ -16,8 +16,7 @@ function renderDataAnalysis() {
         <button class="btn" id="reportBtn" style="background:#4a6fa5;">📊 综合报表</button>
         <button class="btn" id="alertBtn">⚠️ 预警管理</button>
         <select id="examClassFilter" style="padding:6px 12px;border-radius:6px;border:1px solid #ddd;">
-          <option value="">全部班级</option>
-          ${loadClassData().classes.map(c => `<option value="${c.id}">${c.name}</option>`).join('')}
+          ${renderClassOptions('')}
         </select>
       </div>
       <div id="analysisContent">
@@ -55,7 +54,7 @@ function renderExamEntry() {
         <div style="flex:1;min-width:120px;">
           <label>班级</label>
           <select id="examClass" style="width:100%;padding:6px 12px;border-radius:6px;border:1px solid #ddd;">
-            ${data.classes.map(c => `<option value="${c.id}">${c.name}</option>`).join('')}
+            ${renderClassOptions('')}
           </select>
         </div>
         <div style="flex:1;min-width:120px;">
@@ -419,10 +418,10 @@ function renderReport() {
   students.forEach(s => {
     const scores = examData.scores.filter(sc => sc.studentId === s.id);
     const avg = scores.length > 0 ? scores.reduce((sum, sc) => sum + (sc.chinese || 0), 0) / scores.length : 0;
-    const attRecords = attData.records.filter(r => r.studentId === s.id);
-    const absent = attRecords.filter(r => r.type === '缺课').length;
-    const late = attRecords.filter(r => r.type === '迟到').length;
-    const leave = attRecords.filter(r => r.type === '事假' || r.type === '病假').length;
+    // 新考勤数据结构：attendance 数组存异常（缺课/迟到），leaves 数组存请假
+    const absent = attData.attendance.filter(r => r.studentId === s.id && r.type === '缺课').length;
+    const late = attData.attendance.filter(r => r.studentId === s.id && r.type === '迟到').length;
+    const leave = attData.leaves.filter(r => r.studentId === s.id && (r.status === '已批准' || r.status === '已销假')).length;
 
     html += `
       <tr>
@@ -465,14 +464,14 @@ function renderAlert() {
         });
       }
     }
-    // 连续缺课预警
-    const attRecords = attData.records.filter(r => r.studentId === s.id && r.type === '缺课');
-    if (attRecords.length >= 3) {
+    // 连续缺课预警（新数据结构：从 attendance 数组统计）
+    const attAbsent = attData.attendance.filter(r => r.studentId === s.id && r.type === '缺课');
+    if (attAbsent.length >= 3) {
       alerts.push({
         student: s.name,
         class: getClassName(s.classId, data),
         type: '连续缺课',
-        detail: `连续缺课 ${attRecords.length} 次`,
+        detail: `连续缺课 ${attAbsent.length} 次`,
         severity: 'danger'
       });
     }

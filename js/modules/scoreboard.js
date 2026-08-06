@@ -7,7 +7,7 @@ const SCORE_KEY = 'studentScores';
 
 // ========== 默认数据 ==========
 function getDefaultScores() {
-  const classData = JSON.parse(localStorage.getItem('classData') || '{}');
+  const classData = loadClassData();
   const students = classData.students || [];
   const scores = {};
   students.forEach(s => {
@@ -50,7 +50,7 @@ function calcTotal(scores) {
 // ========== 渲染积分榜 ==========
 function renderScoreboard() {
   const scores = loadScores();
-  const classData = JSON.parse(localStorage.getItem('classData') || '{}');
+  const classData = loadClassData();
   const students = classData.students || [];
   
   // 更新学生名单（如有新增）
@@ -125,7 +125,7 @@ function renderScoreboard() {
         <td style="padding:6px 10px;text-align:center;font-weight:${index < 3 ? '700' : '400'};font-size:${index < 3 ? '1.1rem' : '0.9rem'};">${medal}</td>
         <td style="padding:6px 10px;text-align:left;font-weight:${index < 3 ? '600' : ''};">
           ${item.name}
-          <span style="font-size:0.7rem;color:var(--text-light);margin-left:8px;">${getClassName(item.classId, JSON.parse(localStorage.getItem('classData') || '{}'))}</span>
+          <span style="font-size:0.7rem;color:var(--text-light);margin-left:8px;">${getClassName(item.classId, loadClassData())}</span>
         </td>
         <td style="padding:6px 10px;text-align:center;"><input type="number" value="${item.scores.de}" min="0" max="100" onchange="updateScore('${item.id}','de',this.value)" style="width:40px;padding:2px 4px;border-radius:4px;border:1px solid #ddd;background:var(--bg);color:var(--text);text-align:center;" /></td>
         <td style="padding:6px 10px;text-align:center;"><input type="number" value="${item.scores.zhi}" min="0" max="100" onchange="updateScore('${item.id}','zhi',this.value)" style="width:40px;padding:2px 4px;border-radius:4px;border:1px solid #ddd;background:var(--bg);color:var(--text);text-align:center;" /></td>
@@ -312,7 +312,7 @@ function addScoreToAll() {
 // ========== 导出报表 ==========
 function exportScoreReport() {
   const scores = loadScores();
-  const classData = JSON.parse(localStorage.getItem('classData') || '{}');
+  const classData = loadClassData();
   let text = '学生积分报表\n' + '='.repeat(40) + '\n';
   text += `导出时间: ${new Date().toLocaleString()}\n\n`;
   
@@ -359,11 +359,7 @@ function closeOverlay(id) {
   if (el) el.remove();
 }
 
-// ========== 获取班级名称 ==========
-function getClassName(classId, classData) {
-  const cls = classData.classes.find(c => c.id === classId);
-  return cls ? cls.name : '未分配';
-}
+// ========== 获取班级名称（使用 class-data.js 全局版本，不再重复定义）==========
 
 // ========== 快捷入口函数 ==========
 function openScoreboard() {
@@ -387,4 +383,4 @@ window.exportScoreReport = exportScoreReport;
 window.resetAllScores = resetAllScores;
 window.refreshScoreboard = refreshScoreboard;
 window.closeOverlay = closeOverlay;
-window.getClassName = getClassName;
+// getClassName 已由 class-data.js 暴露到全局，此处不再重复覆盖
