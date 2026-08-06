@@ -112,6 +112,23 @@ function getTodoStats() {
 function loadTodoItems() { return getTodoAll().filter(i => i.dueDate === fmtToday()); }
 function saveTodoItems(items) { saveTodoAll(items); }
 
+// ===== 时间范围判断（本周/本月/本年）=====
+function ymdKey(dateStr) { return Number(dateStr.replace(/-/g, '')); }
+function isThisWeek(dateStr) {
+  const today = new Date();
+  const day = today.getDay(); // 0=周日
+  const monday = new Date(today); monday.setDate(today.getDate() - ((day + 6) % 7));
+  const sunday = new Date(monday); sunday.setDate(monday.getDate() + 6);
+  const k = ymdKey(dateStr), lo = ymdKey(formatDate(monday)), hi = ymdKey(formatDate(sunday));
+  return k >= lo && k <= hi;
+}
+function isThisMonth(dateStr) {
+  const [y, m] = dateStr.split('-').map(Number);
+  const t = new Date();
+  return y === t.getFullYear() && m === t.getMonth() + 1;
+}
+function isThisYear(dateStr) { return Number(dateStr.slice(0, 4)) === new Date().getFullYear(); }
+
 // ===== 重复任务滚动生成 =====
 function rollRepeat() {
   const all = getTodoAll();
@@ -156,7 +173,9 @@ function getVisibleTodos() {
   if (todoFilter === 'open') list = list.filter(i => !i.done);
   else if (todoFilter === 'done') list = list.filter(i => i.done);
   else if (todoFilter === 'overdue') list = list.filter(i => !i.done && i.dueDate < today);
-  else if (TODO_CATEGORIES.includes(todoFilter)) list = list.filter(i => i.category === todoFilter);
+  else if (todoFilter === 'weekly') list = list.filter(i => isThisWeek(i.dueDate));
+  else if (todoFilter === 'monthly') list = list.filter(i => isThisMonth(i.dueDate));
+  else if (todoFilter === 'yearly') list = list.filter(i => isThisYear(i.dueDate));
   if (todoSearch) {
     const q = todoSearch.toLowerCase();
     list = list.filter(i => (i.text + ' ' + i.note + ' ' + i.source).toLowerCase().includes(q));
@@ -190,14 +209,18 @@ function renderTabsInner() {
   const openCount = all.filter(i => !i.done).length;
   const doneCount = all.filter(i => i.done).length;
   const overdueCount = all.filter(i => !i.done && i.dueDate < today).length;
-  const catCounts = {};
-  TODO_CATEGORIES.forEach(c => catCounts[c] = all.filter(i => i.category === c).length);
+  const weeklyCount = all.filter(i => isThisWeek(i.dueDate)).length;
+  const monthlyCount = all.filter(i => isThisMonth(i.dueDate)).length;
+  const yearlyCount = all.filter(i => isThisYear(i.dueDate)).length;
   const tabs = [
     { f: 'all', label: '全部', n: all.length },
     { f: 'open', label: '未完成', n: openCount },
     { f: 'done', label: '已完成', n: doneCount },
-    { f: 'overdue', label: '逾期', n: overdueCount }
-  ].concat(TODO_CATEGORIES.map(c => ({ f: c, label: c, n: catCounts[c] })));
+    { f: 'overdue', label: '逾期', n: overdueCount },
+    { f: 'weekly', label: '本周', n: weeklyCount },
+    { f: 'monthly', label: '本月', n: monthlyCount },
+    { f: 'yearly', label: '本年', n: yearlyCount }
+  ];
   return tabs.map(t =>
     `<div class="todo-tab ${todoFilter === t.f ? 'active' : ''}" data-filter="${t.f}">${t.label}<span class="todo-tab-badge">${t.n}</span></div>`
   ).join('');
