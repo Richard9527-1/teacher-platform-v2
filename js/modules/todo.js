@@ -195,10 +195,10 @@ function getVisibleTodos() {
 function renderStatsInner() {
   const s = getTodoStats();
   return `
-    <div style="display:flex;gap:12px;flex-wrap:wrap;margin-bottom:12px;">
-      <div style="background:var(--bg);padding:10px 16px;border-radius:var(--radius-md);"><span style="font-weight:700;color:var(--c-primary);">${s.allOpen}</span> <span style="color:var(--text-light);">待完成</span></div>
-      <div style="background:var(--c-success-bg);padding:10px 16px;border-radius:var(--radius-md);"><span style="font-weight:700;color:var(--c-success-text);">${s.todayDone}/${s.todayTotal}</span> <span style="color:var(--c-success-text);">今日完成</span></div>
-      <div style="background:var(--c-danger-bg);padding:10px 16px;border-radius:var(--radius-md);"><span style="font-weight:700;color:var(--c-danger-text);">${s.overdue}</span> <span style="color:var(--c-danger-text);">逾期</span></div>
+    <div style="display:flex;gap:10px;flex-wrap:wrap;">
+      <div style="background:var(--bg);padding:8px 14px;border-radius:var(--radius-md);"><span style="font-weight:700;color:var(--c-primary);">${s.allOpen}</span> <span style="color:var(--text-light);">待完成</span></div>
+      <div style="background:var(--c-success-bg);padding:8px 14px;border-radius:var(--radius-md);"><span style="font-weight:700;color:var(--c-success-text);">${s.todayDone}/${s.todayTotal}</span> <span style="color:var(--c-success-text);">今日完成</span></div>
+      <div style="background:var(--c-danger-bg);padding:8px 14px;border-radius:var(--radius-md);"><span style="font-weight:700;color:var(--c-danger-text);">${s.overdue}</span> <span style="color:var(--c-danger-text);">逾期</span></div>
     </div>`;
 }
 
@@ -232,8 +232,10 @@ function dueBadge(it, today) {
 function renderTodo() {
   return `<div class="card">
     <div class="panel-head"><h2 class="panel-title">⏰ 待办清单</h2></div>
-    <div id="todoStats">${renderStatsInner()}</div>
-    <div class="todo-tabs" id="todoTabs">${renderTabsInner()}</div>
+    <div class="todo-stats-row">
+      <div id="todoStats">${renderStatsInner()}</div>
+      <div class="todo-tabs" id="todoTabs">${renderTabsInner()}</div>
+    </div>
     <div class="todo-toolbar">
       <input type="text" id="todoSearch" class="da-input" placeholder="🔍 搜索内容 / 备注 / 来源" value="${htmlEncode(todoSearch)}" />
       <div class="todo-actions">
@@ -330,23 +332,19 @@ function showAddTodoForm(editId) {
   overlay.className = 'modal-overlay';
   const prioOpts = Object.entries(TODO_PRIORITIES).map(([v, p]) =>
     `<option value="${v}" ${editing && editing.priority === v ? 'selected' : ''}>${p.label}</option>`).join('');
-  const catOpts = TODO_CATEGORIES.map(c =>
-    `<option value="${c}" ${editing && editing.category === c ? 'selected' : ''}>${c}</option>`).join('');
   const repOpts = TODO_REPEATS.map(r =>
     `<option value="${r.v}" ${editing && editing.repeat === r.v ? 'selected' : ''}>${r.label}</option>`).join('');
   overlay.innerHTML = `<div class="modal-box" style="max-width:520px;">
     <h3>${editing ? '✏️ 编辑待办' : '✏️ 添加待办事项'}</h3>
     <div class="form-group"><label>事项内容 *</label><input type="text" id="todoText" value="${editing ? htmlEncode(editing.text) : ''}" placeholder="如：批改作文、备课《赤壁赋》" /></div>
     <div class="form-row">
-      <div class="form-group"><label>分类</label><select id="todoCategory">${catOpts}</select></div>
       <div class="form-group"><label>优先级</label><select id="todoPriority">${prioOpts}</select></div>
+      <div class="form-group"><label>到期日</label><input type="date" id="todoDue" value="${editing ? editing.dueDate : fmtToday()}" /></div>
     </div>
     <div class="form-row">
-      <div class="form-group"><label>到期日</label><input type="date" id="todoDue" value="${editing ? editing.dueDate : fmtToday()}" /></div>
       <div class="form-group"><label>时间（可选）</label><input type="time" id="todoTime" value="${editing ? editing.time : ''}" /></div>
+      <div class="form-group"><label>重复</label><select id="todoRepeat">${repOpts}</select></div>
     </div>
-    <div class="form-group"><label>重复</label><select id="todoRepeat">${repOpts}</select></div>
-    <div class="form-group"><label>来源/关联</label><input type="text" id="todoSource" value="${editing ? htmlEncode(editing.source || '') : ''}" placeholder="如：备课中心、作文批改" /></div>
     <div class="form-group"><label>备注（可选）</label><textarea id="todoNote" rows="2" placeholder="补充说明">${editing ? htmlEncode(editing.note || '') : ''}</textarea></div>
     <div class="modal-actions">
       <button class="btn" id="saveTodoBtn">${editing ? '保存' : '添加'}</button>
@@ -362,8 +360,6 @@ function showAddTodoForm(editId) {
       id: editing ? editing.id : genId(),
       text,
       note: document.getElementById('todoNote').value.trim(),
-      source: document.getElementById('todoSource').value.trim() || '手动添加',
-      category: document.getElementById('todoCategory').value,
       priority: document.getElementById('todoPriority').value,
       dueDate: document.getElementById('todoDue').value || fmtToday(),
       time: document.getElementById('todoTime').value || '',

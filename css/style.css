@@ -1252,6 +1252,15 @@ body.dark .answer {
 }
 
 /* ===== 待办模块（重构版） ===== */
+.todo-stats-row { display:flex; align-items:center; gap:14px; flex-wrap:wrap; margin-bottom:12px; }
+.todo-stats-row #todoStats { flex-shrink:0; }
+.todo-stats-row .todo-tabs { flex:1; min-width:200px; margin-bottom:0; }
+
+@media (max-width:768px) {
+  .todo-stats-row { flex-direction:column; align-items:stretch; }
+  .todo-stats-row #todoStats { width:100%; }
+}
+
 .todo-tabs { display:flex; gap:8px; flex-wrap:wrap; margin-bottom:14px; }
 .todo-tab {
   flex:1; min-width:72px; text-align:center; padding:10px 6px; border-radius:10px;
