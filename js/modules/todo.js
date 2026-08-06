@@ -20,7 +20,7 @@ const TODO_REPEATS = [
 ];
 
 // 模块内筛选/搜索状态
-let todoFilter = 'all';
+let todoFilter = 'weekly';
 let todoSearch = '';
 let todoChart = null;
 
@@ -205,18 +205,10 @@ function renderStatsInner() {
 // ===== 渲染：筛选 Tab =====
 function renderTabsInner() {
   const all = getTodoAll();
-  const today = fmtToday();
-  const openCount = all.filter(i => !i.done).length;
-  const doneCount = all.filter(i => i.done).length;
-  const overdueCount = all.filter(i => !i.done && i.dueDate < today).length;
   const weeklyCount = all.filter(i => isThisWeek(i.dueDate)).length;
   const monthlyCount = all.filter(i => isThisMonth(i.dueDate)).length;
   const yearlyCount = all.filter(i => isThisYear(i.dueDate)).length;
   const tabs = [
-    { f: 'all', label: '全部', n: all.length },
-    { f: 'open', label: '未完成', n: openCount },
-    { f: 'done', label: '已完成', n: doneCount },
-    { f: 'overdue', label: '逾期', n: overdueCount },
     { f: 'weekly', label: '本周', n: weeklyCount },
     { f: 'monthly', label: '本月', n: monthlyCount },
     { f: 'yearly', label: '本年', n: yearlyCount }
