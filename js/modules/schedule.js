@@ -203,7 +203,7 @@ function renderSchedule() {
     const defaultTime = data[DAYS[0]] && data[DAYS[0]][period] ? data[DAYS[0]][period].time : '';
     html += `<tr>`;
     html += `<td><span class="period-label">${period}</span></td>`;
-    html += `<td><input type="time" class="time-input" data-period="${period}" value="${defaultTime}" step="60" style="width:80px;padding:4px 6px;border-radius:5px;border:1px solid #b8c2d4;background:#f6f8fb;color:#333;box-shadow:inset 0 1px 2px rgba(0,0,0,0.04);" /></td>`;
+    html += `<td><input type="time" class="time-input" data-period="${period}" value="${defaultTime}" step="60" style="width:80px;padding:4px;border-radius:4px;border:1px solid #ddd;background:var(--bg);color:var(--text);" /></td>`;
     DAYS.forEach(day => {
       if (!data[day]) data[day] = {};
       if (!data[day][period]) {
@@ -215,7 +215,7 @@ function renderSchedule() {
       
       html += `<td style="padding:4px;min-width:160px;">
         <div style="display:flex;gap:4px;align-items:center;flex-wrap:nowrap;">
-          <select class="subject-select" data-day="${day}" data-period="${period}" style="width:55px;padding:4px 6px;border-radius:5px;border:1px solid #b8c2d4;background:#f0f4f8;color:#333;font-size:0.8rem;flex-shrink:0;box-shadow:inset 0 1px 2px rgba(0,0,0,0.04);">
+          <select class="subject-select" data-day="${day}" data-period="${period}" style="width:55px;padding:4px;border-radius:4px;border:1px solid #ddd;background:var(--bg);color:var(--text);font-size:0.8rem;flex-shrink:0;">
             <option value="">学科</option>
             <option value="语文" ${subject === '语文' ? 'selected' : ''}>语文</option>
             <option value="数学" ${subject === '数学' ? 'selected' : ''}>数学</option>
@@ -227,7 +227,7 @@ function renderSchedule() {
             <option value="地理" ${subject === '地理' ? 'selected' : ''}>地理</option>
             <option value="政治" ${subject === '政治' ? 'selected' : ''}>政治</option>
           </select>
-          <input type="text" class="course-input" data-day="${day}" data-period="${period}" value="${text}" placeholder="课文名" style="width:85px;padding:4px 6px;border-radius:5px;border:1px solid #b8c2d4;background:#f6f8fb;color:#333;font-size:0.8rem;flex-shrink:0;box-shadow:inset 0 1px 2px rgba(0,0,0,0.04);" />
+          <input type="text" class="course-input" data-day="${day}" data-period="${period}" value="${text}" placeholder="课文名" style="width:85px;padding:4px;border-radius:4px;border:1px solid #ddd;background:var(--bg);color:var(--text);font-size:0.8rem;flex-shrink:0;" />
         </div>
       </td>`;
     });
