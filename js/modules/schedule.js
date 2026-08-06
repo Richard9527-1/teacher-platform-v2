@@ -7,6 +7,25 @@ const SCHEDULE_KEY = 'scheduleData';
 const DEFAULT_PERIODS = ['早自习', '第1节', '第2节', '第3节', '第4节', '第5节', '第6节', '第7节', '晚自习1', '晚自习2'];
 const DAYS = ['周一', '周二', '周三', '周四', '周五', '周六', '周日'];
 
+// 学科专属配色（柔和底色 + 同色系深字 + 同色系边框），便于一眼分辨排课
+var SUBJECT_COLORS = {
+  '语文': { bg:'#e3f2fd', fg:'#0d47a1', bd:'#90caf9' },
+  '数学': { bg:'#fce4ec', fg:'#880e4f', bd:'#f48fb1' },
+  '英语': { bg:'#e8f5e9', fg:'#1b5e20', bd:'#a5d6a7' },
+  '物理': { bg:'#fff3e0', fg:'#e65100', bd:'#ffcc80' },
+  '化学': { bg:'#f3e5f5', fg:'#4a148c', bd:'#ce93d8' },
+  '生物': { bg:'#e0f7fa', fg:'#006064', bd:'#80deea' },
+  '历史': { bg:'#fff8e1', fg:'#ff6f00', bd:'#ffe082' },
+  '地理': { bg:'#e8eaf6', fg:'#283593', bd:'#9fa8da' },
+  '政治': { bg:'#ffebee', fg:'#b71c1c', bd:'#ef9a9a' }
+};
+var SUBJECT_EMPTY = { bg:'#f5f6f8', fg:'#666', bd:'#cfd6e0' };
+
+function subjectBgStyle(subject) {
+  var c = SUBJECT_COLORS[subject] || SUBJECT_EMPTY;
+  return 'background:' + c.bg + ';color:' + c.fg + ';border:1px solid ' + c.bd + ';';
+}
+
 function getDefaultSchedule() {
   const schedule = {};
   DAYS.forEach(day => {
@@ -215,7 +234,7 @@ function renderSchedule() {
       
       html += `<td style="padding:4px;min-width:160px;">
         <div style="display:flex;gap:4px;align-items:center;flex-wrap:nowrap;">
-          <select class="subject-select" data-day="${day}" data-period="${period}" style="width:55px;padding:4px;border-radius:4px;border:1px solid #ddd;background:var(--bg);color:var(--text);font-size:0.8rem;flex-shrink:0;">
+          <select class="subject-select" data-day="${day}" data-period="${period}" style="width:55px;padding:4px;border-radius:4px;${subjectBgStyle(subject)}font-size:0.8rem;flex-shrink:0;">
             <option value="">学科</option>
             <option value="语文" ${subject === '语文' ? 'selected' : ''}>语文</option>
             <option value="数学" ${subject === '数学' ? 'selected' : ''}>数学</option>
@@ -280,6 +299,10 @@ function initSchedule() {
       if (!data[day]) data[day] = {};
       if (!data[day][period]) data[day][period] = { subject: '', text: '', time: '' };
       data[day][period].subject = val;
+      const sc = SUBJECT_COLORS[val] || SUBJECT_EMPTY;
+      this.style.background = sc.bg;
+      this.style.color = sc.fg;
+      this.style.borderColor = sc.bd;
       saveSchedule(data);
       updateTotalsAndDashboard(data);
     });
