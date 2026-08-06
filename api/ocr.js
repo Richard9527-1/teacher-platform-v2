@@ -166,15 +166,21 @@ function normalizeDetections(detections) {
   });
 }
 
+// 统一 JSON 响应（兼容 Vercel 原生 Node 运行时：无 Express 的 res.status/.json）
+function sendJson(res, code, obj) {
+  res.writeHead(code, { 'Content-Type': 'application/json; charset=utf-8' });
+  res.end(JSON.stringify(obj));
+}
+
 module.exports = async function handler(req, res) {
   // --- CORS：允许前端与接口分开部署（如前端在 GitHub Pages） ---
   res.setHeader('Access-Control-Allow-Origin', '*');
   res.setHeader('Access-Control-Allow-Methods', 'POST, OPTIONS');
   res.setHeader('Access-Control-Allow-Headers', 'Content-Type');
 
-  if (req.method === 'OPTIONS') return res.status(200).end();
+  if (req.method === 'OPTIONS') { res.writeHead(200); return res.end(); }
   if (req.method !== 'POST') {
-    return res.status(405).json({ error: '只支持 POST 请求' });
+    return sendJson(res, 405, { error: '只支持 POST 请求' });
   }
 
   const secretId = process.env.TENCENT_SECRET_ID;
@@ -182,7 +188,7 @@ module.exports = async function handler(req, res) {
   const region = process.env.TENCENT_OCR_REGION || 'ap-guangzhou';
 
   if (!secretId || !secretKey) {
-    return res.status(500).json({
+    return sendJson(res, 500, {
       error: '服务端未配置密钥：请在部署平台设置 TENCENT_SECRET_ID / TENCENT_SECRET_KEY'
     });
   }
@@ -206,7 +212,7 @@ module.exports = async function handler(req, res) {
   const imageUrl = body.imageUrl || '';
 
   if (!imageBase64 && !imageUrl) {
-    return res.status(400).json({ error: '缺少图片数据（imageBase64 或 imageUrl）' });
+    return sendJson(res, 400, { error: '缺少图片数据（imageBase64 或 imageUrl）' });
   }
   // 容错：前端若误传了 data:image/...;base64, 前缀，这里剥掉
   if (imageBase64.startsWith('data:')) {
@@ -229,7 +235,7 @@ module.exports = async function handler(req, res) {
 
     if (r.Error) {
       // 常见：AuthFailure.SignatureFailure(密钥错) / RequestLimitExceeded(超额)
-      return res.status(502).json({
+      return sendJson(res, 502, {
         error: `腾讯云返回错误：${r.Error.Code} - ${r.Error.Message}`
       });
     }
@@ -241,7 +247,7 @@ module.exports = async function handler(req, res) {
     // text 为「原始物理行」拼接，仅作兜底；正式排版由前端基于 blocks 完成
     const text = detections.map(d => d.DetectedText || '').join('\n').trim();
 
-    return res.status(200).json({
+    return sendJson(res, 200, {
       text,
       blocks,
       hasWordPolygon,
@@ -249,7 +255,7 @@ module.exports = async function handler(req, res) {
       requestId: r.RequestId || ''
     });
   } catch (err) {
-    return res.status(500).json({
+    return sendJson(res, 500, {
       error: '识别请求失败：' + (err && err.message ? err.message : String(err))
     });
   }

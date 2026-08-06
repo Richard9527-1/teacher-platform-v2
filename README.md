@@ -137,10 +137,18 @@
    |---|---|
    | `TENCENT_SECRET_ID` | 你的 SecretId |
    | `TENCENT_SECRET_KEY` | 你的 SecretKey |
+   | `TENCENT_OCR_REGION` | （可选）地域，默认 `ap-guangzhou` |
+
+> 仓库根目录已带 `vercel.json`（`buildCommand: null` + `framework: null`），
+> 会自动按「纯静态 + api 函数」部署，上面第 3 步的 Framework / Build 设置可留默认。
 
 5. 点 **Deploy**，等 1 分钟左右
 
 完成后得到网址 `https://你的项目.vercel.app`，**把这个网址发给别人，打开就能用手写识别。**
+
+> ⚙️ 若前端在 GitHub Pages、只把 OCR 后端放 Vercel：打开应用 → 作文批改 → 📷 手写录入
+> → 展开「⚙️ 识别接口地址」→ 填入 `https://你的项目.vercel.app/api/ocr` → 保存。
+> 同一份代码已支持跨域（CORS `*`）。
 
 > 改完密钥或环境变量后，需在 Vercel 里 **Redeploy** 一次才生效。
 
@@ -225,6 +233,7 @@ https://你的项目.vercel.app/api/ocr
 │  └─ ocr.js                 ★ 服务端代理（腾讯云 OCR，TC3 签名，零依赖）
 ├─ data/sample-data.js
 ├─ .env.example              环境变量样例
+├─ vercel.json               Vercel 部署配置（无构建 + api 函数）
 └─ .gitignore
 ```
 
