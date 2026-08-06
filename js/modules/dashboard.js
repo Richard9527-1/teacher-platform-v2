@@ -1,9 +1,9 @@
 function renderDashboard() {
   return `
     <div class="card">
-      <div class="card-header">
-        <h2><i class="fas fa-smile" style="color:#ffb74d;"></i> 欢迎使用语文智备Pro</h2>
-        <span style="color:var(--text-light);">今天也祝您备课顺利！</span>
+      <div class="panel-head">
+        <h2 class="panel-title"><i class="fas fa-smile" style="color:#ffb74d;"></i> 欢迎使用语文智备Pro</h2>
+        <span class="panel-sub">今天也祝您备课顺利！</span>
       </div>
       <div class="stat-grid">
         <div class="stat-item"><div class="num">4</div><div class="label">今日课程</div></div>
@@ -14,9 +14,9 @@ function renderDashboard() {
     </div>
 
     <div class="card">
-      <div class="card-header">
-        <h2><i class="fas fa-clock"></i> 今日教学安排</h2>
-        <span class="badge" style="background:#4a6fa5;color:white;padding:2px 12px;border-radius:30px;font-size:0.75rem;">更新于 2026-07-07</span>
+      <div class="panel-head">
+        <h2 class="panel-title"><i class="fas fa-clock"></i> 今日教学安排</h2>
+        <span class="badge">更新于 2026-07-07</span>
       </div>
       <table class="schedule-table">
         <thead><tr><th>时间</th><th>班级</th><th>课程</th><th>状态</th></tr></thead>
@@ -30,7 +30,7 @@ function renderDashboard() {
     </div>
 
     <div class="card">
-      <div class="card-header"><h2><i class="fas fa-bolt"></i> 快捷功能</h2></div>
+      <div class="panel-head"><h2 class="panel-title"><i class="fas fa-bolt"></i> 快捷功能</h2></div>
       <div class="quick-grid">
         <div class="quick-item" data-module="lesson"><i class="fas fa-file-signature"></i><span>新建教案</span><span class="sub">快速创建教学设计</span></div>
         <div class="quick-item" data-module="essay"><i class="fas fa-edit"></i><span>作文批改</span><span class="sub">进入作文管理中心</span></div>

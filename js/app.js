@@ -1172,6 +1172,11 @@ function initAppAfterLogin() {
     }, 30000);
   }
 
+  // ---- 自动备份（按设置周期静默执行）----
+  if (typeof window.runAutoBackupIfNeeded === 'function') {
+    try { window.runAutoBackupIfNeeded(); } catch(e) { console.warn('[自动备份] 执行失败', e); }
+  }
+
   // ---- 默认加载工作台 ----
   if (typeof showModule === 'function') {
     showModule('dashboard');

@@ -159,10 +159,11 @@ function getTodayRemaining() {
 
 function renderTodaySchedule(lessons) {
   if (!lessons || lessons.length === 0) {
-    return '<p style="color:#7f8c8d;text-align:center;padding:12px;">今日暂无课程安排 📭</p>';
+    return '<p class="empty">今日暂无课程安排 📭</p>';
   }
-  let html = `<table>
-    <tr><th>时间</th><th>学科</th><th>课文</th><th>状态</th></tr>`;
+  let html = `<table class="ui-table">
+    <thead><tr><th>时间</th><th>学科</th><th>课文</th><th>状态</th></tr></thead>
+    <tbody>`;
   lessons.forEach(lesson => {
     const statusMap = {
       '已完成': '<span class="status done">已完成</span>',
@@ -176,7 +177,7 @@ function renderTodaySchedule(lessons) {
       <td>${statusMap[lesson.status] || lesson.status}</td>
     </tr>`;
   });
-  html += '</table>';
+  html += '</tbody></table>';
   return html;
 }
 
@@ -208,8 +209,13 @@ function renderSchedule() {
   const periods = getAllPeriods(data);
 
   let html = `<div class="card">
-    <h2>📅 周课程表 <span style="font-size:0.8rem;color:#7f8c8d;">（点击单元格修改，自动保存）</span></h2>
-    <div style="margin-bottom:12px;color:#4a6fa5;font-size:0.9rem;background:#e8f0fe;padding:8px 14px;border-radius:8px;">
+    <div class="panel-head">
+      <div>
+        <h2 class="panel-title">📅 周课程表</h2>
+        <div class="panel-sub">点击单元格修改，自动保存</div>
+      </div>
+    </div>
+    <div style="margin-bottom:12px;color:var(--c-info-text);font-size:0.9rem;background:var(--c-info-bg);padding:8px 14px;border-radius:var(--radius-md);">
       💡 选择<b>学科</b>，输入<b>课文名称</b>，设置上课时间
     </div>
     <div style="overflow-x:auto;">
@@ -250,12 +256,12 @@ function renderSchedule() {
         </div>
       </td>`;
     });
-    html += `<td><button class="del-row-btn" data-period="${period}" style="background:#dc3545;color:#fff;border:none;border-radius:4px;cursor:pointer;padding:2px 8px;">✕</button></td>`;
+    html += `<td><button class="del-row-btn da-link-danger" data-period="${period}" title="删除节次">✕</button></td>`;
     html += `</tr>`;
   });
 
   // 汇总行
-  html += `<tr style="background:#f0f4f8;font-weight:bold;">`;
+  html += `<tr style="background:var(--bg);font-weight:bold;">`;
   html += `<td>📊 合计</td><td></td>`;
   DAYS.forEach(day => {
     const lessons = getDayLessons(day, data);
@@ -266,7 +272,7 @@ function renderSchedule() {
     </div>
     <div style="margin-top:12px;display:flex;gap:10px;flex-wrap:wrap;">
       <button class="btn" id="addPeriodBtn">＋ 添加节次</button>
-      <button class="btn" id="resetScheduleBtn" style="background:#dc3545;">重置所有课程</button>
+      <button class="btn btn-danger" id="resetScheduleBtn">重置所有课程</button>
     </div>
   </div>`;
   return html;

@@ -153,7 +153,7 @@ function renderDataAnalysis() {
   try {
     return `
       <div class="card">
-        <h2>📊 数据分析中心</h2>
+        <div class="panel-head"><h2 class="panel-title">📊 数据分析中心</h2></div>
         <div class="da-toolbar">
           <button class="da-btn" id="addExamBtn">📝 录入成绩</button>
           <button class="da-btn" id="viewExamBtn">📋 成绩列表</button>
@@ -177,7 +177,7 @@ function renderDataAnalysis() {
     `;
   } catch (e) {
     console.error('数据分析渲染错误:', e);
-    return `<div class="card"><h2>⚠️ 数据加载失败</h2><p>${htmlEncode(e.message)}</p><button class="da-btn" onclick="localStorage.removeItem('examData');localStorage.removeItem('attendanceData');location.reload();">重置数据</button></div>`;
+    return `<div class="card"><div class="panel-head"><h2 class="panel-title">⚠️ 数据加载失败</h2></div><p>${htmlEncode(e.message)}</p><button class="da-btn" onclick="localStorage.removeItem('examData');localStorage.removeItem('attendanceData');location.reload();">重置数据</button></div>`;
   }
 }
 
@@ -324,7 +324,7 @@ function renderAnalysis() {
   var rows = students.map(function (s) {
     var scores = examData.scores.filter(function (sc) { return sc.studentId === s.id; });
     if (scores.length === 0) {
-      return `<tr><td class="da-td">${htmlEncode(s.name)}</td><td class="da-td">${htmlEncode(getClassName(s.classId, data))}</td><td class="da-td" colspan="5" style="color:#7f8c8d;">暂无成绩</td></tr>`;
+      return `<tr><td class="da-td">${htmlEncode(s.name)}</td><td class="da-td">${htmlEncode(getClassName(s.classId, data))}</td><td class="da-td" colspan="5" style="color:var(--text-light);">暂无成绩</td></tr>`;
     }
     var avgC = avgField(scores, 'chinese');
     var avgD = avgField(scores, 'dictation');

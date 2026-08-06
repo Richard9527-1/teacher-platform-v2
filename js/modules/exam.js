@@ -75,10 +75,10 @@ function renderHistoryInto(box) {
         <div style="font-size:0.76rem;color:var(--text-light);margin-top:2px;">${escapeHtml(rec.summary || '')} · ${meta.generatedCount || 0}题 / ${meta.totalScore || 0}分 · 保存于 ${escapeHtml((rec.savedAt || '').slice(0, 10))}</div>
       </div>
       <div style="display:flex;gap:6px;flex-shrink:0;">
-        <button class="btn hist-load" data-id="${rec._id}" style="margin:0;padding:4px 12px;font-size:0.8rem;background:#2b5797;color:#fff;border:none;border-radius:6px;cursor:pointer;">打开</button>
-        <button class="btn hist-word" data-id="${rec._id}" style="margin:0;padding:4px 12px;font-size:0.8rem;background:#16a085;color:#fff;border:none;border-radius:6px;cursor:pointer;">Word</button>
-        <button class="btn hist-json" data-id="${rec._id}" style="margin:0;padding:4px 12px;font-size:0.8rem;background:#6c757d;color:#fff;border:none;border-radius:6px;cursor:pointer;">JSON</button>
-        <button class="btn hist-del" data-id="${rec._id}" style="margin:0;padding:4px 12px;font-size:0.8rem;background:#fff;color:#c0392b;border:1px solid #e0c0c0;border-radius:6px;cursor:pointer;">删除</button>
+        <button class="btn btn-info hist-load" data-id="${rec._id}">打开</button>
+        <button class="btn btn-success hist-word" data-id="${rec._id}">Word</button>
+        <button class="btn btn-secondary hist-json" data-id="${rec._id}">JSON</button>
+        <button class="da-link-danger hist-del" data-id="${rec._id}">删除</button>
       </div>
     </div>`;
   }).join('');
@@ -88,14 +88,14 @@ function renderFavPanelInto(p) {
   const favs = getFavs();
   if (!favs.length) { p.innerHTML = '<div style="padding:12px;color:var(--text-light);font-size:0.85rem;">暂无收藏的题目。在题目下方点「☆ 收藏」即可加入收藏夹。</div>'; return; }
   const toolbar = `<div style="display:flex;gap:8px;flex-wrap:wrap;margin-bottom:10px;">
-    <button class="btn fav-insert-all" style="margin:0;padding:4px 12px;font-size:0.78rem;background:#2980b9;color:#fff;border:none;border-radius:6px;cursor:pointer;">＋ 全部插入当前试卷</button>
-    <button class="btn fav-clear" style="margin:0;padding:4px 12px;font-size:0.78rem;background:#fff;color:#c0392b;border:1px solid #e0c0c0;border-radius:6px;cursor:pointer;">🗑 清空收藏夹</button>
+    <button class="btn btn-info fav-insert-all">＋ 全部插入当前试卷</button>
+    <button class="da-link-danger fav-clear">🗑 清空收藏夹</button>
   </div>`;
   p.innerHTML = toolbar + favs.map(f => `<div style="display:flex;justify-content:space-between;align-items:center;gap:10px;padding:10px 12px;background:var(--card-bg);border:1px solid #eee;border-radius:8px;margin-bottom:8px;">
     <div style="flex:1;min-width:0;"><b style="font-size:0.85rem;">${escapeHtml(f.q.type || '题')}${f.q.mode === '理解性' ? '（理解性）' : ''}</b> <span style="font-size:0.72rem;color:var(--text-light);">来自 ${escapeHtml(f.fromName || '')}</span><div style="font-size:0.8rem;color:#555;white-space:nowrap;overflow:hidden;text-overflow:ellipsis;">${escapeHtml(f.q.question || '')}</div></div>
     <div style="display:flex;gap:6px;flex-shrink:0;">
-      <button class="btn fav-insert" data-id="${f.id}" style="margin:0;padding:3px 10px;font-size:0.75rem;background:#fff;border:1px solid #cfe0ef;color:#2980b9;border-radius:6px;cursor:pointer;">＋ 插入试卷</button>
-      <button class="btn fav-remove" data-id="${f.id}" style="margin:0;padding:3px 10px;font-size:0.75rem;background:#fff;border:1px solid #e0c0c0;color:#c0392b;border-radius:6px;cursor:pointer;">移出</button>
+      <button class="da-link fav-insert" data-id="${f.id}">＋ 插入试卷</button>
+      <button class="da-link-danger fav-remove" data-id="${f.id}">移出</button>
     </div>
   </div>`).join('');
 }
@@ -330,10 +330,10 @@ function cnNum(n) {
 function sectionRowHtml(idx, selectedType, count, score) {
   const types = ['选择题', '多选题', '默写', '翻译', '赏析', '主观题', '现代文阅读'];
   const opts = types.map(t => `<option value="${t}"${t === selectedType ? ' selected' : ''}>${typeLabelOf(t)}</option>`).join('');
-  return `<div class="paper-section-row" data-idx="${idx}" style="background:#fff;border:1px solid #e8e8e8;border-radius:8px;padding:12px;margin-bottom:10px;">
+  return `<div class="paper-section-row" data-idx="${idx}" style="background:var(--card-bg);border:1px solid rgba(0,0,0,0.08);border-radius:8px;padding:12px;margin-bottom:10px;">
     <div style="display:flex;justify-content:space-between;align-items:center;margin-bottom:10px;gap:8px;">
       <select class="secType" style="flex:1;min-width:120px;padding:7px 8px;border-radius:6px;border:1px solid #ddd;background:var(--bg);color:var(--text);font-weight:500;">${opts}</select>
-      <button type="button" class="btn secDel" style="margin:0;padding:4px 8px;background:transparent;color:#c0392b;border:none;font-size:0.8rem;cursor:pointer;white-space:nowrap;">✕ 删除</button>
+      <button type="button" class="da-link-danger secDel">✕ 删除</button>
     </div>
     <div style="display:flex;gap:16px;align-items:center;flex-wrap:wrap;">
       <div style="display:flex;align-items:center;gap:6px;">
@@ -366,11 +366,11 @@ function renderExam() {
   const initCount = defaultSections.reduce((s, x) => s + x.count, 0);
   const initScore = defaultSections.reduce((s, x) => s + x.count * x.score, 0);
 
-  const chipHtml = textNames.map(k => `<button type="button" class="text-chip" data-value="${k}" style="min-width:0;padding:8px 12px;border:1px solid #e0e0e0;border-radius:6px;background:#fff;color:var(--text);font-size:0.85rem;cursor:pointer;text-align:center;transition:all .15s;white-space:nowrap;overflow:hidden;text-overflow:ellipsis;">${k}</button>`).join('');
+  const chipHtml = textNames.map(k => `<button type="button" class="text-chip" data-value="${k}" style="min-width:0;padding:8px 12px;font-size:0.85rem;cursor:pointer;text-align:center;transition:all .15s;white-space:nowrap;overflow:hidden;text-overflow:ellipsis;">${k}</button>`).join('');
 
   return `
     <div class="card">
-      <h2 style="margin-bottom:18px;">📋 高考题库与智能组卷</h2>
+      <div class="panel-head"><h2 class="panel-title">📋 高考题库与智能组卷</h2></div>
 
       <div style="display:grid;grid-template-columns:repeat(auto-fit, minmax(320px, 1fr));gap:20px;align-items:stretch;">
         <!-- 左列：筛选与课文 -->
@@ -412,7 +412,7 @@ function renderExam() {
         </div>
 
         <!-- 右列：试卷结构 -->
-        <div style="background:#fafafa;border:1px solid #eee;border-radius:10px;padding:14px;display:flex;flex-direction:column;">
+        <div style="background:var(--bg);border:1px solid rgba(0,0,0,0.08);border-radius:10px;padding:14px;display:flex;flex-direction:column;">
           <div style="display:flex;justify-content:space-between;align-items:center;margin-bottom:12px;">
             <div style="font-weight:600;font-size:1rem;">📐 试卷结构</div>
             <div style="font-size:0.8rem;color:var(--text-light);">题型 × 数量 × 分值</div>
@@ -426,7 +426,7 @@ function renderExam() {
           </div>
 
           <div style="display:flex;justify-content:space-between;align-items:center;margin-top:12px;flex-wrap:wrap;gap:10px;">
-            <button type="button" class="btn" id="addSectionBtn" style="background:#28a745;font-size:0.85rem;margin:0;">＋ 添加题型</button>
+            <button type="button" class="btn btn-success" id="addSectionBtn" style="font-size:0.85rem;margin:0;">＋ 添加题型</button>
             <span style="font-size:0.95rem;color:var(--text);font-weight:500;">📊 全卷合计：<b id="paperTotalCount">${initCount}</b> 题 / <b id="paperTotalScore">${initScore}</b> 分</span>
           </div>
 
@@ -1163,7 +1163,7 @@ function generateModernReadingQuestions(item, name, count) {
 // 兼容：传入 paper 对象（{meta, sections}）按大题分节渲染；传入扁平数组则按旧样式渲染
 function renderQuestions(paper) {
   if (paper && paper.error) {
-    return `<div style="background:#f8d7da;padding:16px;border-radius:8px;color:#721c24;">⚠️ 组卷失败：${paper.error}</div>`;
+    return `<div style="background:var(--c-danger-bg);padding:16px;border-radius:8px;color:var(--c-danger-text);">⚠️ 组卷失败：${paper.error}</div>`;
   }
   let sections, isPaper = false, totalScore = 0, meta = null;
   if (paper && Array.isArray(paper.sections)) {
@@ -1174,22 +1174,22 @@ function renderQuestions(paper) {
   } else if (Array.isArray(paper)) {
     sections = [{ type: '试题', score: 0, generated: paper.length, label: '试题', questions: paper.filter(q => q && !q.error) }];
   } else {
-    return '<p style="color:#7f8c8d;padding:20px;">无题目生成</p>';
+    return '<p class="empty">无题目生成</p>';
   }
 
   let html = '<div style="display:flex;flex-direction:column;gap:18px;">';
   if (isPaper && !paper.error) {
     html += `<div style="display:flex;gap:10px;align-items:center;flex-wrap:wrap;background:var(--card-bg);padding:12px 14px;border-radius:8px;box-shadow:0 1px 4px rgba(0,0,0,0.06);">
       <input id="paperNameInput" placeholder="试卷名称（如：高三一轮复习卷）" value="${escapeAttr(paper.name || '')}" style="flex:1;min-width:200px;padding:8px 12px;border-radius:6px;border:1px solid #ddd;background:var(--bg);color:var(--text);" />
-      <button class="btn" id="savePaperBtn" style="background:#16a085;margin:0;white-space:nowrap;">💾 保存试卷</button>
-      <button class="btn" id="clonePaperBtn" style="background:#7f8c8d;margin:0;white-space:nowrap;">📋 另存副本</button>
-      <button class="btn" id="favToggleBtn" style="background:#d4a017;margin:0;white-space:nowrap;">★ 收藏夹(${favSet.size})</button>
+      <button class="btn btn-success" id="savePaperBtn">💾 保存试卷</button>
+      <button class="btn btn-secondary" id="clonePaperBtn">📋 另存副本</button>
+      <button class="btn btn-warning" id="favToggleBtn">★ 收藏夹(${favSet.size})</button>
     </div>`;
   }
   if (isPaper) {
     let headExtra = '';
     if (meta.totalCount && meta.generatedCount < meta.totalCount) {
-      headExtra = `<div style="text-align:center;color:#b8860b;font-size:0.82rem;margin-top:4px;">⚠️ 部分题型题量不足，已按实际可生成题量出题（实 ${meta.generatedCount} / 应 ${meta.totalCount}）</div>`;
+      headExtra = `<div style="text-align:center;color:var(--c-warning-text);font-size:0.82rem;margin-top:4px;">⚠️ 部分题型题量不足，已按实际可生成题量出题（实 ${meta.generatedCount} / 应 ${meta.totalCount}）</div>`;
     }
     html += `<div style="background:var(--card-bg);padding:14px 18px;border-radius:8px;box-shadow:0 1px 4px rgba(0,0,0,0.06);">
       <div style="font-size:1.1rem;font-weight:700;text-align:center;">📝 语文综合练习卷</div>
@@ -1201,18 +1201,18 @@ function renderQuestions(paper) {
   sections.forEach(sec => {
     const qlist = sec.questions || [];
     if (qlist.length === 0) {
-      html += `<div style="background:#fff3cd;padding:10px 12px;border-radius:8px;color:#856404;">⚠️ ${sec.label}：本大题未生成题目（${sec.type === '现代文阅读' || sec.type === '翻译' ? '篇目类型不匹配或数据不足' : '请检查配置或所选篇目'}）。</div>`;
+      html += `<div style="background:var(--c-warning-bg);padding:10px 12px;border-radius:8px;color:var(--c-warning-text);">⚠️ ${sec.label}：本大题未生成题目（${sec.type === '现代文阅读' || sec.type === '翻译' ? '篇目类型不匹配或数据不足' : '请检查配置或所选篇目'}）。</div>`;
       return;
     }
     let titleExtra = sec.label;
     if (sec.requested && sec.generated < sec.requested) {
-      titleExtra += `　<span style="color:#b8860b;font-size:0.85rem;font-weight:400;">（实出 ${sec.generated} / 应 ${sec.requested} 题）</span>`;
+      titleExtra += `　<span style="color:var(--c-warning-text);font-size:0.85rem;font-weight:400;">（实出 ${sec.generated} / 应 ${sec.requested} 题）</span>`;
     }
     html += `<div style="background:var(--card-bg);padding:14px 16px;border-radius:8px;box-shadow:0 1px 4px rgba(0,0,0,0.06);">`;
     html += `<div style="font-weight:700;margin-bottom:10px;padding-bottom:6px;border-bottom:2px solid #eee;">${titleExtra}</div>`;
     qlist.forEach(q => {
       if (q.error) {
-        html += `<div style="background:#f8d7da;padding:12px;border-radius:8px;color:#721c24;margin-bottom:14px;">⚠️ ${q.error}</div>`;
+        html += `<div style="background:var(--c-danger-bg);padding:12px;border-radius:8px;color:var(--c-danger-text);margin-bottom:14px;">⚠️ ${q.error}</div>`;
         return;
       }
       html += `<div style="margin-bottom:14px;">`;
@@ -1221,7 +1221,7 @@ function renderQuestions(paper) {
       if (q.source) html += `<span style="color:var(--text-light);font-size:0.8rem;">📖 ${q.source}</span>`;
       html += `</div>`;
       html += `<div style="white-space:pre-wrap;margin-bottom:6px;">${q.question}</div>`;
-      if (q.note) html += `<div style="color:#7f8c8d;font-size:0.82rem;margin-bottom:6px;">📝 ${q.note}</div>`;
+      if (q.note) html += `<div style="color:var(--text-light);font-size:0.82rem;margin-bottom:6px;">📝 ${q.note}</div>`;
       if (q.options) {
         const labels = ['A', 'B', 'C', 'D', 'E', 'F'];
         html += `<div style="display:grid;grid-template-columns:1fr 1fr;gap:8px;margin:8px 0;">`;
@@ -1230,22 +1230,22 @@ function renderQuestions(paper) {
         });
         html += `</div>`;
         if (Array.isArray(q.answer)) {
-          html += `<div style="color:#28a745;font-weight:500;">✅ 正确答案：${q.answer.join('、')}${q.correctText ? '（' + q.correctText + '）' : ''}</div>`;
+          html += `<div style="color:var(--c-success);font-weight:500;">✅ 正确答案：${q.answer.join('、')}${q.correctText ? '（' + q.correctText + '）' : ''}</div>`;
         } else {
-          html += `<div style="color:#28a745;font-weight:500;">✅ 正确答案：${q.answer}（${q.correctText}）</div>`;
+          html += `<div style="color:var(--c-success);font-weight:500;">✅ 正确答案：${q.answer}（${q.correctText}）</div>`;
         }
       } else if (q.answer) {
-        html += `<div style="color:#28a745;font-weight:500;">✅ 参考答案：${q.answer}</div>`;
-        if (q.hint) html += `<div style="color:#7f8c8d;font-size:0.85rem;">💡 提示：${q.hint}</div>`;
+        html += `<div style="color:var(--c-success);font-weight:500;">✅ 参考答案：${q.answer}</div>`;
+        if (q.hint) html += `<div style="color:var(--text-light);font-size:0.85rem;">💡 提示：${q.hint}</div>`;
       }
       if (isPaper && q._uid) {
         const isF = favSet.has(q._uid);
         html += `<div style="display:flex;gap:6px;flex-wrap:wrap;margin-top:8px;">
-          <button class="btn q-del" data-uid="${q._uid}" style="margin:0;padding:3px 10px;font-size:0.78rem;background:#fff;color:#c0392b;border:1px solid #e0c0c0;border-radius:6px;cursor:pointer;">🗑 删除</button>
-          <button class="btn q-up" data-uid="${q._uid}" style="margin:0;padding:3px 10px;font-size:0.78rem;background:#fff;color:#2c3e50;border:1px solid #ddd;border-radius:6px;cursor:pointer;">↑ 上移</button>
-          <button class="btn q-down" data-uid="${q._uid}" style="margin:0;padding:3px 10px;font-size:0.78rem;background:#fff;color:#2c3e50;border:1px solid #ddd;border-radius:6px;cursor:pointer;">↓ 下移</button>
-          <button class="btn q-replace" data-uid="${q._uid}" style="margin:0;padding:3px 10px;font-size:0.78rem;background:#fff;color:#2980b9;border:1px solid #cfe0ef;border-radius:6px;cursor:pointer;">🔄 替换</button>
-          <button class="btn q-fav ${isF ? 'active' : ''}" data-uid="${q._uid}" style="margin:0;padding:3px 10px;font-size:0.78rem;background:${isF ? '#fcf3cf' : '#fff'};color:${isF ? '#b8860b' : '#7f8c8d'};border:1px solid ${isF ? '#f0d98c' : '#ddd'};border-radius:6px;cursor:pointer;">${isF ? '★ 已收藏' : '☆ 收藏'}</button>
+          <button class="da-link-danger q-del" data-uid="${q._uid}">🗑 删除</button>
+          <button class="da-link q-up" data-uid="${q._uid}">↑ 上移</button>
+          <button class="da-link q-down" data-uid="${q._uid}">↓ 下移</button>
+          <button class="da-link q-replace" data-uid="${q._uid}">🔄 替换</button>
+          <button class="btn q-fav ${isF ? 'active' : ''}" data-uid="${q._uid}" style="margin:0;padding:3px 10px;font-size:0.78rem;background:${isF ? '#fcf3cf' : '#fff'};color:${isF ? 'var(--c-warning-text)' : 'var(--text-light)'};border:1px solid ${isF ? '#f0d98c' : '#ddd'};border-radius:6px;cursor:pointer;">${isF ? '★ 已收藏' : '☆ 收藏'}</button>
         </div>`;
       }
       html += `</div>`;
@@ -1257,9 +1257,9 @@ function renderQuestions(paper) {
 
   html += `
     <div style="margin-top:16px;display:flex;gap:12px;flex-wrap:wrap;">
-      <button class="btn" id="exportStudentBtn" style="background:#2b5797;">📄 导出学生卷（Word）</button>
-      <button class="btn" id="exportAnswerBtn" style="background:#8e44ad;">📄 导出答案卷（Word）</button>
-      <button class="btn" id="exportJsonBtn" style="background:#6c757d;">📥 导出JSON（含答案）</button>
+      <button class="btn btn-info" id="exportStudentBtn">📄 导出学生卷（Word）</button>
+      <button class="btn btn-info" id="exportAnswerBtn">📄 导出答案卷（Word）</button>
+      <button class="btn btn-secondary" id="exportJsonBtn">📥 导出JSON（含答案）</button>
     </div>
     <div id="favPanel" style="display:none;margin-top:14px;"></div>
   `;
@@ -1645,7 +1645,7 @@ function initExam() {
     if (sections.length === 0 || sections.every(s => (s.count || 0) <= 0)) { alert('请至少配置一个大题并设定题量'); return; }
 
     if (resultDiv) resultDiv.style.display = 'block';
-    resultDiv.innerHTML = '<p style="color:#7f8c8d;padding:20px;">⏳ 正在加载课文详情（全文/译文/难句）…</p>';
+    resultDiv.innerHTML = '<p style="color:var(--text-light);padding:20px;">⏳ 正在加载课文详情（全文/译文/难句）…</p>';
 
     // P0：先按需加载选中课文的详情分片（富数据），合并进 SAMPLE_TEXTS 后再组卷
     const loader = (window.loadTextDetail
@@ -1661,7 +1661,7 @@ function initExam() {
       resultDiv.innerHTML = renderQuestions(currentPaper);
     }).catch(function (err) {
       console.error('[exam] 加载详情失败：', err);
-      resultDiv.innerHTML = '<p style="color:#e74c3c;padding:20px;">⚠️ 加载课文详情失败，请重试。' + (err && err.message ? err.message : '') + '</p>';
+      resultDiv.innerHTML = '<p style="color:var(--c-danger);padding:20px;">⚠️ 加载课文详情失败，请重试。' + (err && err.message ? err.message : '') + '</p>';
     });
   });
 }

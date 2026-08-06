@@ -68,7 +68,7 @@ function filterTasks(tasks) {
 
 // ========== 列表视图 ==========
 function renderListView(tasks) {
-  if (tasks.length === 0) return '<p style="padding:20px;text-align:center;color:var(--text-light);">暂无任务，点击「新增备课」添加。</p>';
+  if (tasks.length === 0) return '<p class="empty">暂无任务，点击「新增备课」添加。</p>';
   let html = '<div class="task-list">';
   tasks.forEach(t => {
     const priorityClass = t.priority === '紧急' ? 'urgent' : (t.priority === '普通' ? 'normal' : 'later');
@@ -88,6 +88,11 @@ function renderListView(tasks) {
             <span class="task-status status-${statusMap[statusText]}">${statusText}</span>
           </div>
           ${t.materials && t.materials.length ? `<div style="font-size:0.8rem;color:var(--text-light);margin-top:4px;">📎 ${t.materials.join('、')}</div>` : ''}
+          ${(t.objectives||t.keyPoints||t.process) ? `<div class="task-outline" style="margin-top:6px;font-size:0.82rem;color:var(--text);line-height:1.5;">
+            ${t.objectives ? `<div><b>目标：</b>${htmlEncode(t.objectives)}</div>` : ''}
+            ${t.keyPoints ? `<div><b>重难点：</b>${htmlEncode(t.keyPoints)}</div>` : ''}
+            ${t.process ? `<div><b>过程：</b>${htmlEncode(t.process)}</div>` : ''}
+          </div>` : ''}
         </div>
         <div class="task-actions">
           <button class="edit-btn" data-id="${t.id}">✏️</button>
@@ -109,7 +114,7 @@ function renderKanbanView(tasks) {
     const items = tasks.filter(t => t.status === status);
     html += `<div class="kanban-column"><h4>${status} (${items.length})</h4>`;
     items.forEach(t => {
-      const priorityColor = t.priority === '紧急' ? '#dc3545' : (t.priority === '普通' ? '#ffc107' : '#6c757d');
+      const priorityColor = t.priority === '紧急' ? 'var(--c-danger)' : (t.priority === '普通' ? 'var(--c-warning)' : 'var(--c-muted)');
       html += `
         <div class="kanban-card" style="border-left-color:${priorityColor};">
           <div class="task-title">${t.title}</div>
@@ -137,39 +142,39 @@ function renderLessonPlan() {
 
   return `
     <div class="card">
-      <h2>📋 备课任务管理</h2>
+      <div class="panel-head"><h2 class="panel-title">📋 备课任务管理</h2></div>
       <div class="task-toolbar">
         <button class="btn" id="addTaskBtn">＋ 新增备课</button>
-        <input type="text" id="searchTask" placeholder="搜索任务标题..." style="width:180px;" />
-        <select id="filterGrade">
+        <input type="text" id="searchTask" class="da-input" placeholder="搜索任务标题..." style="width:180px;" />
+        <select id="filterGrade" class="da-select">
           <option value="">全部年级</option>
           <option value="高一">高一</option>
           <option value="高二">高二</option>
           <option value="高三">高三</option>
         </select>
-        <select id="filterType">
+        <select id="filterType" class="da-select">
   <option value="">全部类型</option>
   <option value="课文">📖 课文</option>
   <option value="文言文">📜 文言文</option>
   <option value="古诗词">📝 古诗词</option>
 </select>
-        <select id="filterStatus">
+        <select id="filterStatus" class="da-select">
           <option value="">全部状态</option>
           <option value="待备课">待备课</option>
           <option value="备课中">备课中</option>
           <option value="已完成">已完成</option>
           <option value="逾期">逾期</option>
         </select>
-        <select id="filterPriority">
+        <select id="filterPriority" class="da-select">
           <option value="">全部优先级</option>
           <option value="紧急">紧急</option>
           <option value="普通">普通</option>
           <option value="延后">延后</option>
         </select>
-        <button class="btn" id="viewToggle">切换为 ${viewMode === 'list' ? '看板' : '列表'} 视图</button>
-        <button class="btn" id="exportTasksBtn">📤 导出文本</button>
-        <button class="btn" id="batchDoneBtn">✅ 批量完成</button>
-        <button class="btn" id="batchArchiveBtn">📦 批量归档</button>
+        <button class="btn btn-secondary" id="viewToggle">切换为 ${viewMode === 'list' ? '看板' : '列表'} 视图</button>
+        <button class="btn btn-secondary" id="exportTasksBtn">📤 导出文本</button>
+        <button class="btn btn-secondary" id="batchDoneBtn">✅ 批量完成</button>
+        <button class="btn btn-secondary" id="batchArchiveBtn">📦 批量归档</button>
       </div>
       <div id="taskContainer">
         ${viewMode === 'list' ? renderListView(filtered) : renderKanbanView(filtered)}
@@ -187,6 +192,7 @@ function showTaskForm(taskId) {
   const task = taskId ? tasks.find(t => t.id === taskId) : null;
   const isEdit = !!task;
 
+  const tpl = (typeof window.loadSettings === 'function' ? window.loadSettings() : {}).defaultLessonTemplate || { objectives:'', keyPoints:'', process:'' };
   const formData = {
     title: task?.title || '',
     type: task?.type || '新授课',
@@ -198,7 +204,10 @@ function showTaskForm(taskId) {
     status: task?.status || '待备课',
     materials: task?.materials ? task.materials.join('、') : '',
     note: task?.note || '',
-    draft: task?.draft || ''
+    draft: task?.draft || '',
+    objectives: task?.objectives || (isEdit ? '' : (tpl.objectives || '')),
+    keyPoints: task?.keyPoints || (isEdit ? '' : (tpl.keyPoints || '')),
+    process: task?.process || (isEdit ? '' : (tpl.process || ''))
   };
 
   const overlay = document.createElement('div');
@@ -260,13 +269,27 @@ function showTaskForm(taskId) {
         <label>备注</label>
         <textarea id="formNote" rows="2">${formData.note}</textarea>
       </div>
+      <div class="form-row">
+        <div class="form-group">
+          <label>教学目标</label>
+          <textarea id="formObjectives" rows="2">${formData.objectives}</textarea>
+        </div>
+        <div class="form-group">
+          <label>教学重难点</label>
+          <textarea id="formKeyPoints" rows="2">${formData.keyPoints}</textarea>
+        </div>
+      </div>
+      <div class="form-group">
+        <label>教学过程 / 作业</label>
+        <textarea id="formProcess" rows="3">${formData.process}</textarea>
+      </div>
       <div class="form-group">
         <label>备课草稿（课堂流程、板书等）</label>
         <textarea id="formDraft" rows="4">${formData.draft}</textarea>
       </div>
       <div class="modal-actions">
         <button class="btn" id="saveTaskBtn">${isEdit ? '更新' : '创建'}</button>
-        <button class="btn" style="background:#6c757d;" id="closeModalBtn">取消</button>
+        <button class="btn btn-secondary" id="closeModalBtn">取消</button>
       </div>
     </div>
   `;
@@ -286,12 +309,15 @@ function showTaskForm(taskId) {
     const materials = document.getElementById('formMaterials').value.split(',').map(s => s.trim()).filter(Boolean);
     const note = document.getElementById('formNote').value;
     const draft = document.getElementById('formDraft').value;
+    const objectives = document.getElementById('formObjectives').value;
+    const keyPoints = document.getElementById('formKeyPoints').value;
+    const process = document.getElementById('formProcess').value;
 
     const tasks = loadTasks();
     if (isEdit) {
       const idx = tasks.findIndex(t => t.id === taskId);
       if (idx !== -1) {
-        tasks[idx] = { ...tasks[idx], title, type, grade, classes, deadline, classTime, priority, status, materials, note, draft, updatedAt: Date.now() };
+        tasks[idx] = { ...tasks[idx], title, type, grade, classes, deadline, classTime, priority, status, materials, note, draft, objectives, keyPoints, process, updatedAt: Date.now() };
       }
     } else {
       tasks.push({
@@ -307,6 +333,9 @@ function showTaskForm(taskId) {
         materials,
         note,
         draft,
+        objectives,
+        keyPoints,
+        process,
         createdAt: Date.now(),
         updatedAt: Date.now(),
         archived: false

@@ -35,9 +35,9 @@ function getResourceData(type) {
 // 索引中 hasDetail=1 表示该篇已补齐七类详情数据（全文/拼音/注释/译文/讲解/赏析/考点）
 function detailBadge(item) {
   if (item.hasDetail || item.fullText) {
-    return '<span title="已补齐全文、拼音、注释、译文、讲解、赏析、考点" style="margin-left:6px;background:#e8f5e9;color:#2e7d32;padding:1px 7px;border-radius:10px;font-size:0.7rem;font-weight:500;vertical-align:middle;">✓ 已完善</span>';
+    return '<span class="tag tag-success" style="margin-left:6px;vertical-align:middle;">✓ 已完善</span>';
   }
-  return '<span title="仅有基础信息，详情待补充" style="margin-left:6px;background:#f5f5f5;color:#9e9e9e;padding:1px 7px;border-radius:10px;font-size:0.7rem;font-weight:500;vertical-align:middle;">待完善</span>';
+  return '<span class="tag tag-muted" style="margin-left:6px;vertical-align:middle;">待完善</span>';
 }
 
 // ========== 单卡片渲染（各列表共用） ==========
@@ -49,7 +49,7 @@ function resourceCardHtml(item) {
   const cleanTitle = item.title.replace(/^\*\s*/, '');
   const safeTitle = item.title.replace(/'/g, "\\'");
   return `
-    <div style="background:var(--card-bg);border-radius:8px;padding:12px;box-shadow:0 1px 4px rgba(0,0,0,0.06);border-left:4px solid ${borderColor};">
+    <div class="res-card" style="border-left-color:${borderColor};">
       <div style="font-weight:600;font-size:1rem;">${cleanTitle}${detailBadge(item)}</div>
       <div style="font-size:0.85rem;color:var(--text-light);">
         ${item.author || '佚名'} · ${item.dynasty || ''} · ${item.grade || ''}
@@ -59,8 +59,8 @@ function resourceCardHtml(item) {
         ${item.tags ? item.tags.slice(0,3).map(t => `<span style="background:${tagBg};padding:1px 8px;border-radius:12px;margin:2px;">${t}</span>`).join('') : ''}
       </div>
       <div style="margin-top:8px;display:flex;gap:6px;flex-wrap:wrap;">
-        <button class="btn" onclick="viewResource('${safeTitle}','${item.type}')" style="padding:2px 12px;font-size:0.8rem;">📖 查看</button>
-        <button class="btn" onclick="addToLesson('${safeTitle}')" style="padding:2px 12px;font-size:0.8rem;background:#28a745;">📋 加入备课</button>
+        <button class="btn btn-sm" onclick="viewResource('${safeTitle}','${item.type}')">📖 查看</button>
+        <button class="btn btn-success btn-sm" onclick="addToLesson('${safeTitle}')">📋 加入备课</button>
       </div>
     </div>`;
 }
@@ -68,7 +68,7 @@ function resourceCardHtml(item) {
 // ========== 分页渲染（列表共用） ==========
 function renderPaginated(items) {
   if (items.length === 0) {
-    return '<p style="color:#7f8c8d;text-align:center;padding:20px;">暂无数据，请调整筛选条件或添加教材资源。</p>';
+    return '<p class="empty">暂无数据，请调整筛选条件或添加教材资源。</p>';
   }
   const totalPages = Math.max(1, Math.ceil(items.length / RESOURCE_PAGE_SIZE));
   resourceCurrentPage = Math.min(Math.max(resourceCurrentPage, 1), totalPages);
@@ -92,8 +92,8 @@ function renderResourcePager(total, totalPages) {
     if (opts.disabled) {
       return `<button class="btn" disabled style="padding:3px 10px;font-size:0.78rem;margin:2px;opacity:.45;cursor:not-allowed;">${label}</button>`;
     }
-    const active = opts.active ? 'background:#4a6fa5;color:#fff;' : '';
-    return `<button class="btn" onclick="goResourcePage(${page})" style="padding:3px 10px;font-size:0.78rem;margin:2px;${active}">${label}</button>`;
+    const activeCls = opts.active ? ' active' : '';
+    return `<button class="btn btn-sm${activeCls}" onclick="goResourcePage(${page})" style="margin:2px;">${label}</button>`;
   };
   let btns = '';
   btns += pageBtn('‹ 上一页', cur - 1, { disabled: cur <= 1 });
@@ -282,7 +282,13 @@ function renderDetailFull() {
       });
     });
   }, 0);
-  return fsBtns + '<div class="detail-text">' + content + '</div>';
+  // 按设置中心的「默认显示」开关，在全文下方内联追加注释/译文/考点
+  const s = (typeof window.loadSettings === 'function') ? window.loadSettings() : {};
+  let extra = '';
+  if (s.showNotes && typeof renderDetailNotes === 'function') extra += `<div class="detail-inline">${renderDetailNotes()}</div>`;
+  if (s.showTranslation && typeof renderDetailTranslation === 'function') extra += `<div class="detail-inline">${renderDetailTranslation()}</div>`;
+  if (s.showExamPoints && typeof renderDetailExam === 'function') extra += `<div class="detail-inline">${renderDetailExam()}</div>`;
+  return fsBtns + '<div class="detail-text">' + content + '</div>' + extra;
 }
 
 // ---- 拼音 ----
@@ -542,24 +548,20 @@ function updateCount() {
 function renderResource() {
   return `
     <div class="card">
-      <h2>📁 教材资源中心</h2>
-      <!-- 全部工具栏在一行（删除搜索框） -->
-      <div style="display:flex;flex-wrap:nowrap;gap:4px;align-items:center;margin-bottom:10px;padding:2px 0;overflow-x:auto;">
-        <!-- 标签切换 -->
-        <button class="btn" id="tabAll" style="background:#4a6fa5;padding:3px 10px;font-size:0.75rem;white-space:nowrap;flex-shrink:0;">📚 全部</button>
-        <button class="btn" id="tabText" style="background:#6c757d;padding:3px 10px;font-size:0.75rem;white-space:nowrap;flex-shrink:0;">📖 课文</button>
-        <button class="btn" id="tabWenyan" style="background:#6c757d;padding:3px 10px;font-size:0.75rem;white-space:nowrap;flex-shrink:0;">📜 文言文</button>
-        <button class="btn" id="tabPoetry" style="background:#6c757d;padding:3px 10px;font-size:0.75rem;white-space:nowrap;flex-shrink:0;">📝 古诗词</button>
-        <!-- 操作按钮 -->
-        <button class="btn" id="tabExport" style="background:#6c757d;padding:3px 10px;font-size:0.75rem;white-space:nowrap;flex-shrink:0;">📥 导出</button>
-        <!-- 三个下拉框：宽度自适应 -->
-        <select id="filterGrade" style="padding:3px 6px;border-radius:6px;border:1px solid #ddd;font-size:0.75rem;background:var(--bg);color:var(--text);width:auto;min-width:50px;flex-shrink:0;">
+      <div class="panel-head"><h2 class="panel-title">📁 教材资源中心</h2></div>
+      <div class="toolbar" style="flex-wrap:nowrap;overflow-x:auto;">
+        <button class="btn btn-sm active" id="tabAll">📚 全部</button>
+        <button class="btn btn-sm btn-secondary" id="tabText">📖 课文</button>
+        <button class="btn btn-sm btn-secondary" id="tabWenyan">📜 文言文</button>
+        <button class="btn btn-sm btn-secondary" id="tabPoetry">📝 古诗词</button>
+        <button class="btn btn-sm btn-secondary" id="tabExport">📥 导出</button>
+        <select id="filterGrade" class="da-select">
           <option value="">年级</option>
           <option value="高一">高一</option>
           <option value="高二">高二</option>
           <option value="高三">高三</option>
         </select>
-        <select id="filterUnit" style="padding:3px 6px;border-radius:6px;border:1px solid #ddd;font-size:0.75rem;background:var(--bg);color:var(--text);width:auto;min-width:50px;flex-shrink:0;">
+        <select id="filterUnit" class="da-select">
           <option value="">单元</option>
           <option value="第一单元">第一单元</option>
           <option value="第二单元">第二单元</option>
@@ -569,16 +571,15 @@ function renderResource() {
           <option value="第八单元">第八单元</option>
           <option value="古诗词诵读">古诗词诵读</option>
         </select>
-        <select id="filterType" style="padding:3px 6px;border-radius:6px;border:1px solid #ddd;font-size:0.75rem;background:var(--bg);color:var(--text);width:auto;min-width:50px;flex-shrink:0;">
+        <select id="filterType" class="da-select">
           <option value="">类型</option>
           <option value="课文">课文</option>
           <option value="文言文">文言文</option>
           <option value="古诗词">古诗词</option>
         </select>
-        <!-- 按钮 -->
-        <button class="btn" id="filterBtn" style="background:#4a6fa5;padding:3px 10px;font-size:0.75rem;white-space:nowrap;flex-shrink:0;">筛选</button>
-        <button class="btn" id="resetFilterBtn" style="background:#6c757d;padding:3px 10px;font-size:0.75rem;white-space:nowrap;flex-shrink:0;">重置</button>
-        <span style="color:var(--text-light);font-size:0.75rem;white-space:nowrap;flex-shrink:0;" id="resultCount">共0条</span>
+        <button class="btn btn-sm" id="filterBtn">筛选</button>
+        <button class="btn btn-sm btn-secondary" id="resetFilterBtn">重置</button>
+        <span style="color:var(--text-light);font-size:0.75rem;white-space:nowrap;margin-left:auto;" id="resultCount">共0条</span>
       </div>
       <div id="resourceContent" style="background:var(--bg);padding:16px;border-radius:8px;min-height:300px;">
         ${renderAllList()}
@@ -668,12 +669,8 @@ function initResource() {
     resourceCurrentPage = 1;
     refreshResourceView();
     // 更新标签高亮
-    const allBtns = document.querySelectorAll('#tabAll, #tabText, #tabWenyan, #tabPoetry');
-    allBtns.forEach(b => b.style.background = '#6c757d');
-    if (currentTab === 'all') document.getElementById('tabAll').style.background = '#4a6fa5';
-    else if (currentTab === 'text') document.getElementById('tabText').style.background = '#4a6fa5';
-    else if (currentTab === 'wenyan') document.getElementById('tabWenyan').style.background = '#4a6fa5';
-    else if (currentTab === 'poetry') document.getElementById('tabPoetry').style.background = '#4a6fa5';
+    const activeTabId = currentTab === 'all' ? 'tabAll' : currentTab === 'text' ? 'tabText' : currentTab === 'wenyan' ? 'tabWenyan' : 'tabPoetry';
+    setActiveTab(document.getElementById(activeTabId));
   });
 
   document.getElementById('resetFilterBtn').addEventListener('click', function() {
@@ -684,22 +681,19 @@ function initResource() {
     currentTab = 'all';
     resourceCurrentPage = 1;
     refreshResourceView();
-    document.querySelectorAll('#tabAll, #tabText, #tabWenyan, #tabPoetry').forEach(b => {
-      b.style.background = '#6c757d';
-    });
-    document.getElementById('tabAll').style.background = '#4a6fa5';
+    setActiveTab(document.getElementById('tabAll'));
   });
 
   function setActiveTab(activeBtn) {
     document.querySelectorAll('#tabAll, #tabText, #tabWenyan, #tabPoetry').forEach(b => {
-      b.style.background = '#6c757d';
+      b.classList.remove('active');
     });
-    activeBtn.style.background = '#4a6fa5';
+    activeBtn.classList.add('active');
   }
 
   // 默认显示全部
   currentTab = 'all';
-  document.getElementById('tabAll').style.background = '#4a6fa5';
+  document.getElementById('tabAll').classList.add('active');
   updateCount();
 }
 

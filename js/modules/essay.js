@@ -68,11 +68,11 @@ function renderAITab() {
   const pending = getPendingEssayText();
   return `
     <div id="aiPanel">
-      ${pending ? `<div style="margin-bottom:10px;padding:8px 12px;background:rgba(40,167,69,0.1);border-left:3px solid #28a745;border-radius:6px;font-size:0.85rem;color:var(--text);">📷 已载入手写识别结果，可直接批改（可先在下方修改校对）</div>` : ''}
+      ${pending ? `<div style="margin-bottom:10px;padding:8px 12px;background:rgba(40,167,69,0.1);border-left:3px solid var(--c-success);border-radius:6px;font-size:0.85rem;color:var(--text);">📷 已载入手写识别结果，可直接批改（可先在下方修改校对）</div>` : ''}
       <textarea id="essayInput" rows="8" placeholder="粘贴学生作文内容，或到「📷 手写录入」拍照识别后一键送来..." style="width:100%;padding:10px;border-radius:8px;border:1px solid #ddd;background:var(--bg);color:var(--text);font-size:0.95rem;line-height:1.8;">${escapeForTextarea(pending)}</textarea>
       <div style="display:flex;gap:8px;align-items:center;margin-top:8px;flex-wrap:wrap;">
         <button class="btn" id="gradeBtn">🤖 生成批改</button>
-        <button class="btn" id="toManualFromAiBtn" style="background:#6c757d;">✏️ 转主观批改</button>
+        <button class="btn btn-secondary" id="toManualFromAiBtn">✏️ 转主观批改</button>
         <span id="essayCharCount" style="color:var(--text-light);font-size:0.85rem;"></span>
       </div>
       <div id="essayResult" style="margin-top:16px;background:var(--bg);padding:16px;border-radius:8px;min-height:60px;color:var(--text-light);">等待批改...</div>
@@ -83,12 +83,12 @@ function renderAITab() {
 // ========== 手写录入 Tab（内嵌 OCR 模块） ==========
 function renderOcrTab() {
   if (typeof window.renderOcrBody !== 'function') {
-    return `<div style="padding:20px;color:#dc3545;">⚠️ 手写识别模块未加载，请检查 js/modules/ocr.js 是否引入。</div>`;
+    return `<div style="padding:20px;color:var(--c-danger);">⚠️ 手写识别模块未加载，请检查 js/modules/ocr.js 是否引入。</div>`;
   }
   return `
     <div id="ocrPanel">
       <div style="margin-bottom:12px;padding:10px 14px;background:rgba(74,111,165,0.08);border-radius:8px;font-size:0.85rem;color:var(--text);line-height:1.8;">
-        <b>批改工作流</b>：① 上传手写作文照片 → ② 识别并校对文字 → ③ 点 <b style="color:#28a745;">✍️ 送去批改</b>，文字会自动带入批改页。
+        <b>批改工作流</b>：① 上传手写作文照片 → ② 识别并校对文字 → ③ 点 <b style="color:var(--c-success);">✍️ 送去批改</b>，文字会自动带入批改页。
       </div>
       ${window.renderOcrBody({ embedded: true })}
     </div>
@@ -111,10 +111,10 @@ function renderManualTab() {
       <div style="display:grid;grid-template-columns:1fr 1fr;gap:16px;">
         <!-- 优点选择 -->
         <div style="background:var(--bg);padding:12px;border-radius:8px;">
-          <h4 style="margin-bottom:8px;color:#28a745;">✅ 优点（加分）</h4>
+          <h4 style="margin-bottom:8px;color:var(--c-success);">✅ 优点（加分）</h4>
           <div style="display:flex;flex-wrap:wrap;gap:6px;">
             ${PRESET_STRENGTHS.map(s => `
-              <span class="strength-tag" data-id="${s.id}" style="padding:4px 12px;border-radius:20px;font-size:0.85rem;cursor:pointer;background:${selectedStrengths.includes(s.id) ? '#28a745' : 'var(--card-bg)'};color:${selectedStrengths.includes(s.id) ? '#fff' : 'var(--text)'};border:1px solid ${selectedStrengths.includes(s.id) ? '#28a745' : '#ddd'};transition:all 0.2s;">
+              <span class="strength-tag" data-id="${s.id}" style="padding:4px 12px;border-radius:20px;font-size:0.85rem;cursor:pointer;background:${selectedStrengths.includes(s.id) ? 'var(--c-success)' : 'var(--card-bg)'};color:${selectedStrengths.includes(s.id) ? '#fff' : 'var(--text)'};border:1px solid ${selectedStrengths.includes(s.id) ? 'var(--c-success)' : '#ddd'};transition:all 0.2s;">
                 ${s.name} (+${s.score})
               </span>
             `).join('')}
@@ -123,10 +123,10 @@ function renderManualTab() {
         
         <!-- 缺点选择 -->
         <div style="background:var(--bg);padding:12px;border-radius:8px;">
-          <h4 style="margin-bottom:8px;color:#dc3545;">❌ 缺点（减分）</h4>
+          <h4 style="margin-bottom:8px;color:var(--c-danger);">❌ 缺点（减分）</h4>
           <div style="display:flex;flex-wrap:wrap;gap:6px;">
             ${PRESET_WEAKNESSES.map(w => `
-              <span class="weakness-tag" data-id="${w.id}" style="padding:4px 12px;border-radius:20px;font-size:0.85rem;cursor:pointer;background:${selectedWeaknesses.includes(w.id) ? '#dc3545' : 'var(--card-bg)'};color:${selectedWeaknesses.includes(w.id) ? '#fff' : 'var(--text)'};border:1px solid ${selectedWeaknesses.includes(w.id) ? '#dc3545' : '#ddd'};transition:all 0.2s;">
+              <span class="weakness-tag" data-id="${w.id}" style="padding:4px 12px;border-radius:20px;font-size:0.85rem;cursor:pointer;background:${selectedWeaknesses.includes(w.id) ? 'var(--c-danger)' : 'var(--card-bg)'};color:${selectedWeaknesses.includes(w.id) ? '#fff' : 'var(--text)'};border:1px solid ${selectedWeaknesses.includes(w.id) ? 'var(--c-danger)' : '#ddd'};transition:all 0.2s;">
                 ${w.name} (-${w.score})
               </span>
             `).join('')}
@@ -143,7 +143,7 @@ function renderManualTab() {
             <button class="btn" id="addCustomStrengthBtn" style="padding:6px 12px;font-size:0.85rem;">添加</button>
           </div>
           <div id="customStrengths" style="display:flex;flex-wrap:wrap;gap:4px;margin-top:4px;">
-            ${(saved.customStrengths || []).map(c => `<span style="background:#28a745;color:#fff;padding:2px 10px;border-radius:30px;font-size:0.8rem;display:inline-flex;align-items:center;gap:4px;">${c} <span class="remove-custom" data-type="strength" data-value="${c}" style="cursor:pointer;">✕</span></span>`).join('')}
+            ${(saved.customStrengths || []).map(c => `<span style="background:var(--c-success);color:#fff;padding:2px 10px;border-radius:30px;font-size:0.8rem;display:inline-flex;align-items:center;gap:4px;">${c} <span class="remove-custom" data-type="strength" data-value="${c}" style="cursor:pointer;">✕</span></span>`).join('')}
           </div>
         </div>
         <div>
@@ -153,7 +153,7 @@ function renderManualTab() {
             <button class="btn" id="addCustomWeaknessBtn" style="padding:6px 12px;font-size:0.85rem;">添加</button>
           </div>
           <div id="customWeaknesses" style="display:flex;flex-wrap:wrap;gap:4px;margin-top:4px;">
-            ${(saved.customWeaknesses || []).map(c => `<span style="background:#dc3545;color:#fff;padding:2px 10px;border-radius:30px;font-size:0.8rem;display:inline-flex;align-items:center;gap:4px;">${c} <span class="remove-custom" data-type="weakness" data-value="${c}" style="cursor:pointer;">✕</span></span>`).join('')}
+            ${(saved.customWeaknesses || []).map(c => `<span style="background:var(--c-danger);color:#fff;padding:2px 10px;border-radius:30px;font-size:0.8rem;display:inline-flex;align-items:center;gap:4px;">${c} <span class="remove-custom" data-type="weakness" data-value="${c}" style="cursor:pointer;">✕</span></span>`).join('')}
           </div>
         </div>
       </div>
@@ -161,7 +161,7 @@ function renderManualTab() {
       <!-- 预览和操作 -->
       <div style="margin-top:16px;display:flex;gap:12px;align-items:center;flex-wrap:wrap;">
         <button class="btn" id="previewManualBtn">📊 预览评分</button>
-        <button class="btn" id="generateManualReportBtn" style="background:#28a745;">📝 生成批改报告</button>
+        <button class="btn btn-success" id="generateManualReportBtn">📝 生成批改报告</button>
         <span style="color:var(--text-light);font-size:0.9rem;">基础分：${BASE_SCORE}分（满分60）</span>
       </div>
       
@@ -339,7 +339,7 @@ function initManualTab() {
       previewDiv.innerHTML = `
         <div style="display:grid;grid-template-columns:1fr 1fr;gap:12px;">
           <div>
-            <p><strong>📊 预估分数：</strong><span style="font-size:1.4rem;font-weight:700;color:#4a6fa5;">${result.total}</span>/60</p>
+            <p><strong>📊 预估分数：</strong><span style="font-size:1.4rem;font-weight:700;color:var(--c-primary);">${result.total}</span>/60</p>
             <p><strong>✅ 优点加分：</strong>+${result.strengthScore}分（${result.strengthNames.join('、') || '无'}）</p>
             <p><strong>❌ 缺点减分：</strong>-${result.weaknessScore}分（${result.weaknessNames.join('、') || '无'}）</p>
           </div>
@@ -374,9 +374,9 @@ function initManualTab() {
         this.style.borderColor = '#ddd';
       } else {
         selectedStrengths.push(id);
-        this.style.background = '#28a745';
+        this.style.background = 'var(--c-success)';
         this.style.color = '#fff';
-        this.style.borderColor = '#28a745';
+        this.style.borderColor = 'var(--c-success)';
       }
       updatePreview();
     });
@@ -394,9 +394,9 @@ function initManualTab() {
         this.style.borderColor = '#ddd';
       } else {
         selectedWeaknesses.push(id);
-        this.style.background = '#dc3545';
+        this.style.background = 'var(--c-danger)';
         this.style.color = '#fff';
-        this.style.borderColor = '#dc3545';
+        this.style.borderColor = 'var(--c-danger)';
       }
       updatePreview();
     });
@@ -431,12 +431,12 @@ function initManualTab() {
     const weaknessContainer = document.getElementById('customWeaknesses');
     if (strengthContainer) {
       strengthContainer.innerHTML = customStrengths.map(c => 
-        `<span style="background:#28a745;color:#fff;padding:2px 10px;border-radius:30px;font-size:0.8rem;display:inline-flex;align-items:center;gap:4px;">${c} <span class="remove-custom" data-type="strength" data-value="${c}" style="cursor:pointer;">✕</span></span>`
+        `<span style="background:var(--c-success);color:#fff;padding:2px 10px;border-radius:30px;font-size:0.8rem;display:inline-flex;align-items:center;gap:4px;">${c} <span class="remove-custom" data-type="strength" data-value="${c}" style="cursor:pointer;">✕</span></span>`
       ).join('');
     }
     if (weaknessContainer) {
       weaknessContainer.innerHTML = customWeaknesses.map(c => 
-        `<span style="background:#dc3545;color:#fff;padding:2px 10px;border-radius:30px;font-size:0.8rem;display:inline-flex;align-items:center;gap:4px;">${c} <span class="remove-custom" data-type="weakness" data-value="${c}" style="cursor:pointer;">✕</span></span>`
+        `<span style="background:var(--c-danger);color:#fff;padding:2px 10px;border-radius:30px;font-size:0.8rem;display:inline-flex;align-items:center;gap:4px;">${c} <span class="remove-custom" data-type="weakness" data-value="${c}" style="cursor:pointer;">✕</span></span>`
       ).join('');
     }
     document.querySelectorAll('.remove-custom').forEach(el => {
@@ -467,24 +467,24 @@ function initManualTab() {
       <h3>📊 主观批改报告</h3>
       <div style="display:grid;grid-template-columns:1fr 1fr;gap:12px;margin-top:8px;">
         <div>
-          <p><strong>📊 最终分数：</strong><span style="font-size:1.8rem;font-weight:700;color:#4a6fa5;">${result.total}</span>/60</p>
+          <p><strong>📊 最终分数：</strong><span style="font-size:1.8rem;font-weight:700;color:var(--c-primary);">${result.total}</span>/60</p>
           <p><strong>✅ 优点：</strong>${result.strengthNames.join('、') || '无'}</p>
           <p><strong>❌ 缺点：</strong>${result.weaknessNames.join('、') || '无'}</p>
           <p style="font-size:0.85rem;color:var(--text-light);margin-top:8px;">
-            <span style="color:#28a745;">+${result.strengthScore}</span> / 
-            <span style="color:#dc3545;">-${result.weaknessScore}</span> / 
+            <span style="color:var(--c-success);">+${result.strengthScore}</span> / 
+            <span style="color:var(--c-danger);">-${result.weaknessScore}</span> / 
             基础分 ${BASE_SCORE}
           </p>
         </div>
         <div>
           <p><strong>📝 评语：</strong></p>
-          <p style="white-space:pre-wrap;font-size:0.9rem;background:var(--card-bg);padding:10px;border-radius:6px;border-left:3px solid #4a6fa5;">${comment}</p>
+          <p style="white-space:pre-wrap;font-size:0.9rem;background:var(--card-bg);padding:10px;border-radius:6px;border-left:3px solid var(--c-primary);">${comment}</p>
         </div>
       </div>
       ${essayText ? `<div style="margin-top:12px;padding:10px;background:var(--card-bg);border-radius:6px;font-size:0.85rem;color:var(--text-light);"><strong>📄 作文原文：</strong><br>${essayText.substring(0, 200)}${essayText.length > 200 ? '...' : ''}</div>` : ''}
       <div style="margin-top:12px;display:flex;gap:8px;">
-        <button class="btn" onclick="this.closest('#manualPreview').innerHTML = '选择优缺点后点击「预览评分」'" style="background:#6c757d;">返回预览</button>
-        <button class="btn" onclick="copyEssayReport(this)" style="background:#28a745;">📋 复制报告</button>
+        <button class="btn btn-secondary" onclick="this.closest('#manualPreview').innerHTML = '选择优缺点后点击「预览评分」'">返回预览</button>
+        <button class="btn btn-success" onclick="copyEssayReport(this)">📋 复制报告</button>
       </div>
     `;
   });
@@ -492,16 +492,16 @@ function initManualTab() {
   // 恢复选中样式
   document.querySelectorAll('.strength-tag').forEach(el => {
     if (selectedStrengths.includes(el.dataset.id)) {
-      el.style.background = '#28a745';
+      el.style.background = 'var(--c-success)';
       el.style.color = '#fff';
-      el.style.borderColor = '#28a745';
+      el.style.borderColor = 'var(--c-success)';
     }
   });
   document.querySelectorAll('.weakness-tag').forEach(el => {
     if (selectedWeaknesses.includes(el.dataset.id)) {
-      el.style.background = '#dc3545';
+      el.style.background = 'var(--c-danger)';
       el.style.color = '#fff';
-      el.style.borderColor = '#dc3545';
+      el.style.borderColor = 'var(--c-danger)';
     }
   });
   renderCustomTags();
@@ -530,13 +530,13 @@ function switchEssayTab(key) {
   try {
     cfg.init();
   } catch (e) {
-    content.innerHTML = `<div style="padding:20px;color:#dc3545;">⚠️ 该功能初始化失败：${e.message}</div>`;
+    content.innerHTML = `<div style="padding:20px;color:var(--c-danger);">⚠️ 该功能初始化失败：${e.message}</div>`;
   }
   currentEssayTab = key;
 
   ESSAY_TAB_ORDER.forEach(k => {
     const btn = document.getElementById('essayTab_' + k);
-    if (btn) btn.style.background = (k === key) ? '#4a6fa5' : '#6c757d';
+    if (btn) btn.classList.toggle('active', k === key);
   });
 }
 
@@ -624,12 +624,12 @@ function essayToast(msg) {
 function renderEssay() {
   try {
     const tabBtns = ESSAY_TAB_ORDER.map(k =>
-      `<button class="btn" id="essayTab_${k}" style="background:#6c757d;">${ESSAY_TABS[k].label}</button>`
+      `<button class="btn btn-secondary" id="essayTab_${k}">${ESSAY_TABS[k].label}</button>`
     ).join('');
     return `
       <div class="card">
-        <h2>✍️ 作文批改助手</h2>
-        <p style="color:var(--text-light);font-size:0.85rem;margin:-4px 0 14px;">手写作文拍照识别 → 校对 → 批改出分，一站完成</p>
+        <div class="panel-head"><h2 class="panel-title">✍️ 作文批改助手</h2></div>
+        <p class="panel-sub">手写作文拍照识别 → 校对 → 批改出分，一站完成</p>
         <div style="display:flex;gap:12px;margin-bottom:16px;flex-wrap:wrap;">
           ${tabBtns}
         </div>
@@ -637,7 +637,7 @@ function renderEssay() {
       </div>
     `;
   } catch (e) {
-    return `<div class="card"><h2>⚠️ 加载失败</h2><p>${e.message}</p></div>`;
+    return `<div class="card"><div class="panel-head"><h2 class="panel-title">⚠️ 加载失败</h2></div><p>${e.message}</p></div>`;
   }
 }
 

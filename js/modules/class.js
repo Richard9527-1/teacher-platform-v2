@@ -10,22 +10,21 @@ var studentSearch = '';    // 学生搜索关键词
 function renderClass() {
   return `
     <div class="card">
-      <h2>👥 班级管理</h2>
-      <div style="display:flex;gap:12px;flex-wrap:wrap;margin-bottom:16px;" class="class-toolbar">
+      <div class="panel-head"><h2 class="panel-title">👥 班级管理</h2></div>
+      <div class="class-toolbar">
         <button class="btn" id="addStudentBtn">＋ 添加学生</button>
         <button class="btn" id="addClassBtn">＋ 添加班级</button>
         <button class="btn" id="manageClassBtn">🗂 管理班级</button>
         <button class="btn" id="attendanceBtn">📋 考勤管理</button>
         <button class="btn" id="leaveBtn">📝 请假管理</button>
-        <select id="classFilter" style="padding:6px 12px;border-radius:6px;border:1px solid #ddd;">
+        <select id="classFilter" class="da-select">
           ${renderClassOptions('')}
         </select>
       </div>
-      <!-- Excel 工具栏 -->
-      <div style="display:flex;gap:8px;flex-wrap:wrap;margin-bottom:12px;" class="data-toolbar">
-        <button class="btn" id="exportExcelBtn" style="background:#28a745;">📤 导出Excel</button>
-        <button class="btn" id="downloadTemplateBtn" style="background:#17a2b8;">📥 下载模板</button>
-        <label class="btn" style="background:#6c757d;cursor:pointer;margin:0;">📂 导入恢复<input type="file" id="importFileInput" accept=".xlsx,.xls,.json" style="display:none;" /></label>
+      <div class="data-toolbar">
+        <button class="btn btn-success" id="exportExcelBtn">📤 导出Excel</button>
+        <button class="btn btn-info" id="downloadTemplateBtn">📥 下载模板</button>
+        <label class="btn btn-secondary" style="cursor:pointer;margin:0;">📂 导入恢复<input type="file" id="importFileInput" accept=".xlsx,.xls,.json" style="display:none;" /></label>
       </div>
       <div id="classContent">
         ${renderStudentList()}
@@ -56,7 +55,7 @@ function renderStudentList() {
   var paged = students.slice((studentPage - 1) * STUDENT_PAGE_SIZE, studentPage * STUDENT_PAGE_SIZE);
 
   if (totalStudents === 0) {
-    return '<p style="color:#7f8c8d;text-align:center;padding:20px;">暂无学生，点击「添加学生」录入</p>';
+    return '<p class="empty">暂无学生，点击「添加学生」录入</p>';
   }
 
   // 搜索栏
@@ -64,15 +63,15 @@ function renderStudentList() {
 
   html += `
     <div style="overflow-x:auto;">
-      <table style="width:100%;border-collapse:collapse;font-size:0.9rem;">
+      <table class="ui-table">
         <thead>
-          <tr style="background:#f0f4f8;">
-            <th style="padding:10px 12px;text-align:left;border-bottom:2px solid #ddd;white-space:nowrap;">姓名</th>
-            <th style="padding:10px 12px;text-align:left;border-bottom:2px solid #ddd;white-space:nowrap;">班级</th>
-            <th style="padding:10px 12px;text-align:left;border-bottom:2px solid #ddd;white-space:nowrap;">联系电话</th>
-            <th style="padding:10px 12px;text-align:left;border-bottom:2px solid #ddd;white-space:nowrap;">家庭地址</th>
-            <th style="padding:10px 12px;text-align:left;border-bottom:2px solid #ddd;white-space:nowrap;">备注</th>
-            <th style="padding:10px 12px;text-align:left;border-bottom:2px solid #ddd;white-space:nowrap;">操作</th>
+          <tr>
+            <th>姓名</th>
+            <th>班级</th>
+            <th>联系电话</th>
+            <th>家庭地址</th>
+            <th>备注</th>
+            <th>操作</th>
           </tr>
         </thead>
         <tbody>
@@ -82,14 +81,14 @@ function renderStudentList() {
     var className = getClassName(s.classId, data);
     html += `
       <tr>
-        <td style="padding:10px 12px;border-bottom:1px solid #eee;white-space:nowrap;">${htmlEncode(s.name)}</td>
-        <td style="padding:10px 12px;border-bottom:1px solid #eee;white-space:nowrap;">${htmlEncode(className)}</td>
-        <td style="padding:10px 12px;border-bottom:1px solid #eee;white-space:nowrap;">${htmlEncode(s.phone || '-')}</td>
-        <td style="padding:10px 12px;border-bottom:1px solid #eee;">${htmlEncode(s.address || '-')}</td>
-        <td style="padding:10px 12px;border-bottom:1px solid #eee;">${htmlEncode(s.notes || '-')}</td>
-        <td style="padding:10px 12px;border-bottom:1px solid #eee;white-space:nowrap;">
-          <button class="edit-student-btn" data-id="${s.id}" style="background:none;border:none;color:#4a6fa5;cursor:pointer;font-size:0.9rem;">✏️</button>
-          <button class="del-student-btn" data-id="${s.id}" style="background:none;border:none;color:#dc3545;cursor:pointer;font-size:0.9rem;">🗑️</button>
+        <td style="white-space:nowrap;">${htmlEncode(s.name)}</td>
+        <td style="white-space:nowrap;">${htmlEncode(className)}</td>
+        <td style="white-space:nowrap;">${htmlEncode(s.phone || '-')}</td>
+        <td style="">${htmlEncode(s.address || '-')}</td>
+        <td style="">${htmlEncode(s.notes || '-')}</td>
+        <td style="white-space:nowrap;">
+          <button class="da-link edit-student-btn" data-id="${s.id}">✏️</button>
+          <button class="da-link-danger del-student-btn" data-id="${s.id}">🗑️</button>
         </td>
       </tr>
     `;
@@ -174,7 +173,7 @@ function showStudentForm(studentId) {
       </div>
       <div class="modal-actions">
         <button class="btn" id="saveStudentBtn">${isEdit ? '更新' : '添加'}</button>
-        <button class="btn" id="closeModalBtn" style="background:#6c757d;">取消</button>
+        <button class="btn btn-secondary" id="closeModalBtn">取消</button>
       </div>
     </div>
   `;
@@ -237,7 +236,7 @@ function showClassForm(classId) {
       </div>
       <div class="modal-actions">
         <button class="btn" id="saveClassBtn">${isEdit ? '更新' : '添加'}</button>
-        <button class="btn" id="closeClassModalBtn" style="background:#6c757d;">取消</button>
+        <button class="btn btn-secondary" id="closeClassModalBtn">取消</button>
       </div>
     </div>
   `;
@@ -283,19 +282,19 @@ function showClassManage() {
       <div style="display:flex;align-items:center;justify-content:space-between;padding:8px 0;border-bottom:1px solid #eee;">
         <span>${htmlEncode(c.name)} <span style="color:var(--text-light);font-size:0.8rem;">（${cnt} 人${c.grade ? ' · ' + htmlEncode(c.grade) : ''}）</span></span>
         <span>
-          <button class="edit-class-btn" data-id="${c.id}" style="background:none;border:none;color:#4a6fa5;cursor:pointer;font-size:0.95rem;margin-right:8px;">✏️</button>
-          <button class="del-class-btn" data-id="${c.id}" style="background:none;border:none;color:#dc3545;cursor:pointer;font-size:0.95rem;">🗑️</button>
+          <button class="da-link edit-class-btn" data-id="${c.id}" style="margin-right:8px;">✏️</button>
+          <button class="da-link-danger del-class-btn" data-id="${c.id}">🗑️</button>
         </span>
       </div>`;
   }).join('');
-  if (!clsRows) clsRows = '<p style="color:#7f8c8d;text-align:center;padding:12px;">暂无班级，请先添加</p>';
+  if (!clsRows) clsRows = '<p class="empty">暂无班级，请先添加</p>';
   overlay.innerHTML = `
     <div class="modal-box" style="max-width:440px;">
       <h3>🗂 班级管理</h3>
       <div style="max-height:320px;overflow-y:auto;">${clsRows}</div>
       <div class="modal-actions">
         <button class="btn" id="addClassFromManageBtn">＋ 添加班级</button>
-        <button class="btn" id="closeManageBtn" style="background:#6c757d;">关闭</button>
+        <button class="btn btn-secondary" id="closeManageBtn">关闭</button>
       </div>
     </div>
   `;
@@ -373,7 +372,7 @@ function showLeaveForm() {
       </div>
       <div class="modal-actions">
         <button class="btn" id="saveLeaveBtn">提交</button>
-        <button class="btn" id="closeLeaveBtn" style="background:#6c757d;">取消</button>
+        <button class="btn btn-secondary" id="closeLeaveBtn">取消</button>
       </div>
     </div>
   `;
@@ -417,15 +416,15 @@ function renderAttendance() {
 
   var html = `
     <div class="card">
-      <h3>📋 今日考勤</h3>
-      <div style="display:flex;gap:12px;flex-wrap:wrap;margin-bottom:12px;" class="attendance-toolbar">
-        <input type="date" id="attDate" value="${today}" style="padding:6px 12px;border-radius:6px;border:1px solid #ddd;" />
-        <select id="attClassFilter" style="padding:6px 12px;border-radius:6px;border:1px solid #ddd;">
+      <div class="panel-head"><h3 class="panel-title">📋 今日考勤</h3></div>
+      <div class="attendance-toolbar">
+        <input type="date" id="attDate" value="${today}" class="da-select" />
+        <select id="attClassFilter" class="da-select">
           ${renderClassOptions('')}
         </select>
         <button class="btn" id="attSaveBtn">💾 保存考勤</button>
-        <button class="btn" id="attHistoryBtn" style="background:#17a2b8;">📅 考勤历史</button>
-        <button class="btn" id="attBackBtn" style="background:#6c757d;">返回</button>
+        <button class="btn btn-info" id="attHistoryBtn">📅 考勤历史</button>
+        <button class="btn btn-secondary" id="attBackBtn">返回</button>
       </div>
       <div id="attendanceList">
         ${renderAttendanceTable()}
@@ -449,7 +448,7 @@ function renderAttendanceTable() {
   if (attSearch) students = students.filter(function(s) { return s.name.toLowerCase().indexOf(attSearch) !== -1; });
 
   if (students.length === 0) {
-    return '<p style="color:#7f8c8d;text-align:center;padding:20px;">该班级暂无学生</p>';
+    return '<p class="empty">该班级暂无学生</p>';
   }
 
   // 搜索栏
@@ -457,13 +456,13 @@ function renderAttendanceTable() {
 
   html += `
     <div style="overflow-x:auto;">
-      <table style="width:100%;border-collapse:collapse;font-size:0.9rem;">
+      <table class="ui-table">
         <thead>
-          <tr style="background:#f0f4f8;">
-            <th style="padding:8px;text-align:left;border-bottom:2px solid #ddd;">姓名</th>
-            <th style="padding:8px;text-align:left;border-bottom:2px solid #ddd;">班级</th>
-            <th style="padding:8px;text-align:left;border-bottom:2px solid #ddd;">状态</th>
-            <th style="padding:8px;text-align:left;border-bottom:2px solid #ddd;">备注</th>
+          <tr>
+            <th>姓名</th>
+            <th>班级</th>
+            <th>状态</th>
+            <th>备注</th>
           </tr>
         </thead>
         <tbody>
@@ -478,14 +477,14 @@ function renderAttendanceTable() {
 
     html += `
       <tr>
-        <td style="padding:8px;border-bottom:1px solid #eee;">${htmlEncode(s.name)}</td>
-        <td style="padding:8px;border-bottom:1px solid #eee;">${htmlEncode(className)}</td>
-        <td style="padding:8px;border-bottom:1px solid #eee;">
+        <td style="">${htmlEncode(s.name)}</td>
+        <td style="">${htmlEncode(className)}</td>
+        <td style="">
           <select class="att-status-select" data-student="${s.id}" style="padding:4px 8px;border-radius:4px;border:1px solid #ddd;">
             ${['正常','缺课','迟到'].map(function(v) { return '<option' + (v===status?' selected':'') + '>' + v + '</option>'; }).join('')}
           </select>
         </td>
-        <td style="padding:8px;border-bottom:1px solid #eee;">
+        <td style="">
           <input type="text" class="att-reason-input" data-student="${s.id}" value="${htmlEncode(reason)}" placeholder="原因" style="width:100%;padding:4px 8px;border-radius:4px;border:1px solid #ddd;" />
         </td>
       </tr>
@@ -504,19 +503,19 @@ function renderAttendanceHistory() {
 
   var html = `
     <div class="card">
-      <h3>📅 考勤历史</h3>
-      <div style="display:flex;gap:12px;flex-wrap:wrap;margin-bottom:12px;" class="attendance-toolbar">
+      <div class="panel-head"><h3 class="panel-title">📅 考勤历史</h3></div>
+      <div class="attendance-toolbar">
         <div style="display:flex;align-items:center;gap:4px;">
           <label>日期：</label>
-          <input type="date" id="histDateFrom" value="${today}" style="padding:6px 10px;border-radius:6px;border:1px solid #ddd;" />
+          <input type="date" id="histDateFrom" value="${today}" class="da-select" />
           <span>~</span>
-          <input type="date" id="histDateTo" value="${today}" style="padding:6px 10px;border-radius:6px;border:1px solid #ddd;" />
+          <input type="date" id="histDateTo" value="${today}" class="da-select" />
         </div>
-        <select id="histClassFilter" style="padding:6px 12px;border-radius:6px;border:1px solid #ddd;">
+        <select id="histClassFilter" class="da-select">
           ${renderClassOptions('')}
         </select>
         <button class="btn" id="histQueryBtn">🔍 查询</button>
-        <button class="btn" id="histBackBtn" style="background:#6c757d;">← 返回考勤录入</button>
+        <button class="btn btn-secondary" id="histBackBtn">← 返回考勤录入</button>
       </div>
       <div id="historyContent">${renderHistoryTable()}</div>
     </div>
@@ -546,27 +545,27 @@ function renderHistoryTable() {
   var absentCount = records.filter(function(r) { return r.type === '缺课'; }).length;
   var lateCount = records.filter(function(r) { return r.type === '迟到'; }).length;
 
-  var html = '<div style="display:flex;gap:16px;margin-bottom:12px;font-size:0.9rem;">';
-  html += '<span style="background:#f8d7da;padding:6px 14px;border-radius:20px;">缺课：<strong>' + absentCount + '</strong> 次</span>';
-  html += '<span style="background:#fff3cd;padding:6px 14px;border-radius:20px;">迟到：<strong>' + lateCount + '</strong> 次</span>';
+  var html = '<div style="display:flex;gap:16px;margin-bottom:12px;font-size:0.9rem;flex-wrap:wrap;">';
+  html += '<span class="tag tag-danger">缺课：<strong>' + absentCount + '</strong> 次</span>';
+  html += '<span class="tag tag-warning">迟到：<strong>' + lateCount + '</strong> 次</span>';
   html += '<span style="color:var(--text-light);">共 ' + records.length + ' 条异常记录</span>';
   html += '</div>';
 
   if (records.length === 0) {
-    html += '<p style="color:#7f8c8d;text-align:center;padding:20px;">所选时间段无异常考勤记录</p>';
+    html += '<p class="empty">所选时间段无异常考勤记录</p>';
     return html;
   }
 
   html += `
     <div style="overflow-x:auto;">
-      <table style="width:100%;border-collapse:collapse;font-size:0.9rem;">
+      <table class="ui-table">
         <thead>
-          <tr style="background:#f0f4f8;">
-            <th style="padding:8px;text-align:left;border-bottom:2px solid #ddd;">学生</th>
-            <th style="padding:8px;text-align:left;border-bottom:2px solid #ddd;">班级</th>
-            <th style="padding:8px;text-align:left;border-bottom:2px solid #ddd;">日期</th>
-            <th style="padding:8px;text-align:left;border-bottom:2px solid #ddd;">类别</th>
-            <th style="padding:8px;text-align:left;border-bottom:2px solid #ddd;">原因</th>
+          <tr>
+            <th>学生</th>
+            <th>班级</th>
+            <th>日期</th>
+            <th>类别</th>
+            <th>原因</th>
           </tr>
         </thead>
         <tbody>
@@ -576,11 +575,11 @@ function renderHistoryTable() {
     var s = data.students.find(function(st) { return st.id === r.studentId; });
     html += `
       <tr>
-        <td style="padding:8px;border-bottom:1px solid #eee;">${s ? htmlEncode(s.name) : '未知'}</td>
-        <td style="padding:8px;border-bottom:1px solid #eee;">${s ? htmlEncode(getClassName(s.classId, data)) : '-'}</td>
-        <td style="padding:8px;border-bottom:1px solid #eee;">${r.date}</td>
-        <td style="padding:8px;border-bottom:1px solid #eee;"><span style="padding:2px 10px;border-radius:30px;font-size:0.8rem;background:${r.type==='缺课'?'#f8d7da':'#fff3cd'};">${r.type}</span></td>
-        <td style="padding:8px;border-bottom:1px solid #eee;">${htmlEncode(r.reason || '-')}</td>
+        <td style="">${s ? htmlEncode(s.name) : '未知'}</td>
+        <td style="">${s ? htmlEncode(getClassName(s.classId, data)) : '-'}</td>
+        <td style="">${r.date}</td>
+        <td><span class="tag ${r.type==='缺课'?'tag-danger':'tag-warning'}">${r.type}</span></td>
+        <td style="">${htmlEncode(r.reason || '-')}</td>
       </tr>
     `;
   });
@@ -612,17 +611,17 @@ function renderLeave() {
 
   var html = `
     <div class="card">
-      <h3>📝 请假管理</h3>
-      <div style="display:flex;gap:12px;flex-wrap:wrap;margin-bottom:12px;">
+      <div class="panel-head"><h3 class="panel-title">📝 请假管理</h3></div>
+      <div class="toolbar">
         <button class="btn" id="addLeaveBtn">＋ 新增请假</button>
-        <select id="leaveStatusFilter" style="padding:6px 12px;border-radius:6px;border:1px solid #ddd;">
+        <select id="leaveStatusFilter" class="da-select">
           <option value="">全部状态</option>
           <option value="申请中">申请中</option>
           <option value="已批准">已批准</option>
           <option value="已销假">已销假</option>
           <option value="已拒绝">已拒绝</option>
         </select>
-        <button class="btn" id="leaveBackBtn" style="background:#6c757d;">返回</button>
+        <button class="btn btn-secondary" id="leaveBackBtn">返回</button>
       </div>
       <div id="leaveList">
         ${renderLeaveList()}
@@ -642,20 +641,20 @@ function renderLeaveList() {
   if (filter) filtered = leaves.filter(function(r) { return (r.status || '已批准') === filter; });
 
   if (filtered.length === 0) {
-    return '<p style="color:#7f8c8d;text-align:center;padding:20px;">暂无请假记录</p>';
+    return '<p class="empty">暂无请假记录</p>';
   }
 
   var html = `
     <div style="overflow-x:auto;">
-      <table style="width:100%;border-collapse:collapse;font-size:0.9rem;">
+      <table class="ui-table">
         <thead>
-          <tr style="background:#f0f4f8;">
-            <th style="padding:8px;text-align:left;border-bottom:2px solid #ddd;">学生</th>
-            <th style="padding:8px;text-align:left;border-bottom:2px solid #ddd;">日期</th>
-            <th style="padding:8px;text-align:left;border-bottom:2px solid #ddd;">类型</th>
-            <th style="padding:8px;text-align:left;border-bottom:2px solid #ddd;">原因</th>
-            <th style="padding:8px;text-align:left;border-bottom:2px solid #ddd;">状态</th>
-            <th style="padding:8px;text-align:left;border-bottom:2px solid #ddd;">操作</th>
+          <tr>
+            <th>学生</th>
+            <th>日期</th>
+            <th>类型</th>
+            <th>原因</th>
+            <th>状态</th>
+            <th>操作</th>
           </tr>
         </thead>
         <tbody>
@@ -666,16 +665,16 @@ function renderLeaveList() {
     var status = r.status || '已批准';
     html += `
       <tr>
-        <td style="padding:8px;border-bottom:1px solid #eee;">${htmlEncode(studentName)}</td>
-        <td style="padding:8px;border-bottom:1px solid #eee;">${r.date}</td>
-        <td style="padding:8px;border-bottom:1px solid #eee;">${r.type}</td>
-        <td style="padding:8px;border-bottom:1px solid #eee;">${htmlEncode(r.reason || '-')}</td>
-        <td style="padding:8px;border-bottom:1px solid #eee;">
-          <span style="padding:2px 12px;border-radius:30px;font-size:0.8rem;background:${status==='已批准'?'#d4edda':status==='申请中'?'#fff3cd':'#f8d7da'};color:${status==='已批准'?'#155724':status==='申请中'?'#856404':'#721c24'};">${status}</span>
+        <td style="">${htmlEncode(studentName)}</td>
+        <td style="">${r.date}</td>
+        <td style="">${r.type}</td>
+        <td style="">${htmlEncode(r.reason || '-')}</td>
+        <td>
+          <span class="tag ${status==='已批准'?'tag-success':status==='申请中'?'tag-warning':'tag-danger'}">${status}</span>
         </td>
-        <td style="padding:8px;border-bottom:1px solid #eee;">
-          ${status === '申请中' ? '<button class="approve-leave-btn" data-id="' + r.id + '" style="background:none;border:none;color:#28a745;cursor:pointer;">✅ 批准</button>' : ''}
-          ${status === '已批准' ? '<button class="finish-leave-btn" data-id="' + r.id + '" style="background:none;border:none;color:#4a6fa5;cursor:pointer;">📌 销假</button>' : ''}
+        <td>
+          ${status === '申请中' ? '<button class="da-link-success approve-leave-btn" data-id="' + r.id + '">✅ 批准</button>' : ''}
+          ${status === '已批准' ? '<button class="da-link finish-leave-btn" data-id="' + r.id + '">📌 销假</button>' : ''}
         </td>
       </tr>
     `;

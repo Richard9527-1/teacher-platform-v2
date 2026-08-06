@@ -8,9 +8,9 @@
 const TODO_KEY = 'todoItems';
 const TODO_CATEGORIES = ['备课', '批改', '行政', '会议', '家校', '其他'];
 const TODO_PRIORITIES = {
-  high:   { label: '高', color: '#e74c3c' },
-  normal: { label: '中', color: '#4a6fa5' },
-  low:    { label: '低', color: '#95a5a6' }
+  high:   { label: '高', color: 'var(--c-danger)' },
+  normal: { label: '中', color: 'var(--c-primary)' },
+  low:    { label: '低', color: 'var(--c-muted)' }
 };
 const TODO_REPEATS = [
   { v: 'none',   label: '不重复' },
@@ -196,9 +196,9 @@ function renderStatsInner() {
   const s = getTodoStats();
   return `
     <div style="display:flex;gap:12px;flex-wrap:wrap;margin-bottom:12px;">
-      <div style="background:var(--bg);padding:10px 16px;border-radius:8px;"><span style="font-weight:700;color:#4a6fa5;">${s.allOpen}</span> <span style="color:var(--text-light);">待完成</span></div>
-      <div style="background:#d4edda;padding:10px 16px;border-radius:8px;"><span style="font-weight:700;color:#155724;">${s.todayDone}/${s.todayTotal}</span> <span style="color:#155724;">今日完成</span></div>
-      <div style="background:#f8d7da;padding:10px 16px;border-radius:8px;"><span style="font-weight:700;color:#721c24;">${s.overdue}</span> <span style="color:#721c24;">逾期</span></div>
+      <div style="background:var(--bg);padding:10px 16px;border-radius:var(--radius-md);"><span style="font-weight:700;color:var(--c-primary);">${s.allOpen}</span> <span style="color:var(--text-light);">待完成</span></div>
+      <div style="background:var(--c-success-bg);padding:10px 16px;border-radius:var(--radius-md);"><span style="font-weight:700;color:var(--c-success-text);">${s.todayDone}/${s.todayTotal}</span> <span style="color:var(--c-success-text);">今日完成</span></div>
+      <div style="background:var(--c-danger-bg);padding:10px 16px;border-radius:var(--radius-md);"><span style="font-weight:700;color:var(--c-danger-text);">${s.overdue}</span> <span style="color:var(--c-danger-text);">逾期</span></div>
     </div>`;
 }
 
@@ -229,23 +229,23 @@ function renderTabsInner() {
 // ===== 渲染：到期角标 =====
 function dueBadge(it, today) {
   if (it.done) return '<span style="color:var(--text-light);">已完成</span>';
-  if (it.dueDate < today) return '<span style="color:#dc3545;font-weight:600;">⚠ 逾期</span>';
-  if (it.dueDate === today) return '<span style="color:#4a6fa5;font-weight:600;">今日</span>';
+  if (it.dueDate < today) return '<span style="color:var(--c-danger);font-weight:600;">⚠ 逾期</span>';
+  if (it.dueDate === today) return '<span style="color:var(--c-primary);font-weight:600;">今日</span>';
   const diff = Math.round((new Date(it.dueDate).getTime() - new Date(today).getTime()) / 86400000);
-  if (diff <= 2) return '<span style="color:#e67e22;font-weight:600;">临近</span>';
+  if (diff <= 2) return '<span style="color:var(--c-warning);font-weight:600;">临近</span>';
   return `<span>📅 ${htmlEncode(it.dueDate)}</span>`;
 }
 
 // ===== 渲染：主界面 =====
 function renderTodo() {
   return `<div class="card">
-    <h2>⏰ 待办清单</h2>
+    <div class="panel-head"><h2 class="panel-title">⏰ 待办清单</h2></div>
     <div id="todoStats">${renderStatsInner()}</div>
     <div class="todo-tabs" id="todoTabs">${renderTabsInner()}</div>
     <div class="todo-toolbar">
-      <input type="text" id="todoSearch" placeholder="🔍 搜索内容 / 备注 / 来源" style="width:100%;padding:8px 12px;border-radius:6px;border:1px solid #ddd;background:var(--bg);color:var(--text);" value="${htmlEncode(todoSearch)}" />
+      <input type="text" id="todoSearch" class="da-input" placeholder="🔍 搜索内容 / 备注 / 来源" value="${htmlEncode(todoSearch)}" />
       <div class="todo-actions">
-        <button class="btn" id="addTodoBtn" style="background:#28a745;">＋ 添加待办</button>
+        <button class="btn btn-success" id="addTodoBtn">＋ 添加待办</button>
         <button class="btn btn-secondary" id="supplementTodoBtn">🔄 补充</button>
         <button class="btn btn-secondary" id="exportJsonBtn">📤 JSON</button>
         <button class="btn btn-secondary" id="exportExcelBtn">📊 Excel</button>
@@ -268,7 +268,7 @@ function renderTodoListContainer() {
   if (!listEl) return;
   const items = getVisibleTodos();
   if (items.length === 0) {
-    listEl.innerHTML = '<p style="color:#7f8c8d;text-align:center;padding:30px;">暂无待办事项 🎉</p>';
+    listEl.innerHTML = '<p class="empty">暂无待办事项 🎉</p>';
     return;
   }
   const today = fmtToday();
@@ -281,7 +281,7 @@ function renderTodoListContainer() {
       <div class="todo-item-body">
         <div class="todo-item-text" onclick="editTodo('${it.id}')">${htmlEncode(it.text)}</div>
         <div class="todo-item-meta">
-          <span style="background:var(--bg);border:1px solid rgba(0,0,0,0.08);border-radius:10px;padding:1px 8px;">${htmlEncode(it.category)}</span>
+          <span class="tag tag-muted">${htmlEncode(it.category)}</span>
           ${dueBadge(it, today)}
           ${it.time ? `<span>🕒 ${htmlEncode(it.time)}</span>` : ''}
           ${it.source && it.source !== '手动添加' ? `<span>🔗 ${htmlEncode(it.source)}</span>` : ''}
@@ -289,7 +289,7 @@ function renderTodoListContainer() {
         ${note}
       </div>
       <button class="btn-mini" onclick="pinTodo('${it.id}')" title="置顶">${it.pinned ? '📍' : '📌'}</button>
-      <button onclick="deleteTodo('${it.id}')" style="background:none;border:none;color:#dc3545;cursor:pointer;font-size:1rem;" title="删除">🗑️</button>
+      <button class="da-link-danger" onclick="deleteTodo('${it.id}')" title="删除">🗑️</button>
     </div>`;
   }).join('');
 }
@@ -317,7 +317,7 @@ function renderTrend() {
   }
   todoChart = new Chart(cv.getContext('2d'), {
     type: 'line',
-    data: { labels, datasets: [{ label: '完成数', data, borderColor: '#4a6fa5', backgroundColor: 'rgba(74,111,165,0.15)', fill: true, tension: 0.3, pointRadius: 3 }] },
+    data: { labels, datasets: [{ label: '完成数', data, borderColor: 'var(--c-primary)', backgroundColor: 'rgba(74,111,165,0.15)', fill: true, tension: 0.3, pointRadius: 3 }] },
     options: { responsive: true, plugins: { legend: { display: false } }, scales: { y: { beginAtZero: true, ticks: { precision: 0 } } } }
   });
 }

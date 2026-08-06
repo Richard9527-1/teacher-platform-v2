@@ -88,7 +88,7 @@ function gsRenderDropdown(q, box, dropdown) {
   ];
   const total = groups.reduce((s, g) => s + g.items.length, 0);
   if (total === 0) {
-    dropdown.innerHTML = '<div class="search-empty" style="padding:14px;color:#7f8c8d;">未找到相关结果</div>';
+    dropdown.innerHTML = '<div class="search-empty" style="padding:14px;color:var(--text-light);">未找到相关结果</div>';
     dropdown.style.display = 'block';
     return;
   }

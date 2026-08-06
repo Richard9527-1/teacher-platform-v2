@@ -553,7 +553,7 @@ function renderOcrBody(opts) {
     <!-- 操作栏 -->
     <div style="display:flex;flex-wrap:wrap;gap:10px;margin:16px 0;align-items:center;">
       <button id="ocrStartBtn" style="padding:8px 20px;border-radius:8px;border:none;background:var(--primary);color:#fff;cursor:pointer;font-size:0.95rem;">🚀 开始识别</button>
-      <button id="ocrSendEssayBtn" style="padding:8px 20px;border-radius:8px;border:none;background:#28a745;color:#fff;cursor:pointer;font-size:0.95rem;">✍️ 送去批改</button>
+      <button id="ocrSendEssayBtn" class="btn btn-success">✍️ 送去批改</button>
       <button id="ocrCopyAllBtn" style="padding:8px 16px;border-radius:8px;border:1px solid var(--primary);background:transparent;color:var(--primary);cursor:pointer;">📋 复制全部</button>
       <button id="ocrExportTxtBtn" style="padding:8px 16px;border-radius:8px;border:1px solid var(--text-light);background:transparent;color:var(--text);cursor:pointer;">⬇ 导出 TXT</button>
       <button id="ocrExportMdBtn" style="padding:8px 16px;border-radius:8px;border:1px solid var(--text-light);background:transparent;color:var(--text);cursor:pointer;">⬇ 导出 MD</button>
@@ -771,9 +771,9 @@ function initOcr() {
       list.appendChild(el);
     }
 
-    const statusColor = item.status === '完成' ? '#28a745'
-      : item.status === '失败' ? '#dc3545'
-      : item.status === '识别中' ? '#ffc107'
+    const statusColor = item.status === '完成' ? 'var(--c-success)'
+      : item.status === '失败' ? 'var(--c-danger)'
+      : item.status === '识别中' ? 'var(--c-warning)'
       : 'var(--text-light)';
 
     const preview = item.url
@@ -784,11 +784,11 @@ function initOcr() {
     let layoutBadge = '';
     if (item.status === '完成') {
       if (item.mode === 'slice' && item.sliceCount) {
-        layoutBadge = `<span style="font-size:0.75rem;color:#2e7d32;background:rgba(46,125,50,0.12);padding:2px 8px;border-radius:10px;">✂ 切图识别 ${item.sliceCount} 栏</span>`;
+        layoutBadge = `<span style="font-size:0.75rem;color:var(--c-success-text);background:rgba(46,125,50,0.12);padding:2px 8px;border-radius:10px;">✂ 切图识别 ${item.sliceCount} 栏</span>`;
       } else if (item.hasGeometry && item.columns > 0) {
         layoutBadge = `<span style="font-size:0.75rem;color:var(--primary);background:rgba(74,111,165,0.12);padding:2px 8px;border-radius:10px;">📐 ${item.columns} 栏版面</span>`;
       } else {
-        layoutBadge = `<span style="font-size:0.75rem;color:#b8860b;background:rgba(255,193,7,0.15);padding:2px 8px;border-radius:10px;">⚠ 无坐标，按原始行输出</span>`;
+        layoutBadge = `<span style="font-size:0.75rem;color:var(--c-warning-text);background:rgba(255,193,7,0.15);padding:2px 8px;border-radius:10px;">⚠ 无坐标，按原始行输出</span>`;
       }
     }
 
@@ -808,10 +808,10 @@ function initOcr() {
           </div>
         </div>
         ${textArea}
-        ${item.error ? `<div style="font-size:0.8rem;color:#dc3545;">${item.error}</div>` : ''}
+        ${item.error ? `<div style="font-size:0.8rem;color:var(--c-danger);">${item.error}</div>` : ''}
         <div style="display:flex;gap:8px;">
           <button onclick="window.__ocrCopyOne('${item.id}')" style="padding:4px 12px;border-radius:6px;border:1px solid var(--primary);background:transparent;color:var(--primary);cursor:pointer;font-size:0.85rem;">📋 复制本条</button>
-          <button onclick="window.__ocrToEssay('${item.id}')" style="padding:4px 12px;border-radius:6px;border:1px solid #28a745;background:transparent;color:#28a745;cursor:pointer;font-size:0.85rem;">✍️ 批改本篇</button>
+          <button class="da-link-success" onclick="window.__ocrToEssay('${item.id}')">✍️ 批改本篇</button>
           ${item.rawText
             ? `<button onclick="window.__ocrRawOne('${item.id}')" style="padding:4px 12px;border-radius:6px;border:1px solid var(--text-light);background:transparent;color:var(--text-light);cursor:pointer;font-size:0.85rem;">👁 看原始行</button>`
             : ''}

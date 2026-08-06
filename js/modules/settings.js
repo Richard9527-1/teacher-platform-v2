@@ -16,8 +16,6 @@ const DEFAULT_SETTINGS = {
 
   // 二、基础教学配置
   grades: ['高一', '高二', '高三'],
-  classes: {},
-  textbookVersion: '统编版',
   semester: { start: '', end: '', examPeriods: [] },
 
   // 三、备课&教材偏好
@@ -42,6 +40,10 @@ const DEFAULT_SETTINGS = {
   // 八、打印模板
   printTemplate: 'default'
 };
+
+// 应用版本信息（用于设置中心展示）
+const APP_VERSION = '语文智备Pro v3.0';
+const APP_UPDATE_DATE = '2026-07-08';
 
 // ========== 工具函数 ==========
 function loadSettings() {
@@ -101,15 +103,16 @@ function renderSettings() {
   const settings = loadSettings();
   return `
     <div class="card">
-      <h2>⚙️ 设置中心</h2>
-      <div style="display:grid;grid-template-columns:repeat(auto-fit,minmax(240px,1fr));gap:8px;margin-bottom:16px;">
-        <button class="btn" data-tab="data" style="background:#4a6fa5;">📦 数据管理</button>
-        <button class="btn" data-tab="teaching" style="background:#6c757d;">📚 教学配置</button>
-        <button class="btn" data-tab="lesson" style="background:#6c757d;">📝 备课偏好</button>
-        <button class="btn" data-tab="score" style="background:#6c757d;">📊 成绩分析</button>
-        <button class="btn" data-tab="ui" style="background:#6c757d;">🎨 界面偏好</button>
-        <button class="btn" data-tab="system" style="background:#6c757d;">🖥️ 系统</button>
-        <button class="btn" data-tab="log" style="background:#6c757d;">📋 操作日志</button>
+      <div class="panel-head"><h2 class="panel-title">⚙️ 设置中心</h2></div>
+      <div class="settings-tabs">
+        <button class="btn btn-secondary active" data-tab="data">📦 数据管理</button>
+        <button class="btn btn-secondary" data-tab="teaching">📚 教学配置</button>
+        <button class="btn btn-secondary" data-tab="lesson">📝 备课偏好</button>
+        <button class="btn btn-secondary" data-tab="score">📊 成绩分析</button>
+        <button class="btn btn-secondary" data-tab="ui">🎨 界面偏好</button>
+        <button class="btn btn-secondary" data-tab="system">🖥️ 系统</button>
+        <button class="btn btn-secondary" data-tab="log">📋 操作日志</button>
+        <button class="btn btn-secondary" data-tab="help">❓ 帮助</button>
       </div>
       <div id="settingsContent">
         ${renderDataTab(settings)}
@@ -126,55 +129,55 @@ function renderDataTab(settings) {
     <div style="display:grid;grid-template-columns:1fr 1fr;gap:16px;">
 
       <!-- 分类备份 -->
-      <div style="background:var(--bg);padding:12px;border-radius:8px;">
+      <div style="background:var(--bg);padding:12px;border-radius:var(--radius-md);">
         <h4>💾 分类备份</h4>
-        <div style="display:flex;flex-wrap:wrap;gap:6px;margin:8px 0;">
-          <button class="btn" onclick="backupCategory('lessonTasks')" style="padding:4px 12px;font-size:0.8rem;">备课</button>
-          <button class="btn" onclick="backupCategory('classData')" style="padding:4px 12px;font-size:0.8rem;">班级</button>
-          <button class="btn" onclick="backupCategory('examData')" style="padding:4px 12px;font-size:0.8rem;">试卷</button>
-          <button class="btn" onclick="backupCategory('attendanceData')" style="padding:4px 12px;font-size:0.8rem;">考勤</button>
-          <button class="btn" onclick="backupCategory('scheduleData')" style="padding:4px 12px;font-size:0.8rem;">课程表</button>
-          <button class="btn" onclick="backupAll()" style="padding:4px 12px;font-size:0.8rem;background:#28a745;">📦 全部</button>
+        <div class="btn-group" style="margin:8px 0;">
+          <button class="btn btn-sm" onclick="backupCategory('lessonTasks')">备课</button>
+          <button class="btn btn-sm" onclick="backupCategory('classData')">班级</button>
+          <button class="btn btn-sm" onclick="backupCategory('examData')">试卷</button>
+          <button class="btn btn-sm" onclick="backupCategory('attendanceData')">考勤</button>
+          <button class="btn btn-sm" onclick="backupCategory('scheduleData')">课程表</button>
+          <button class="btn btn-sm btn-success" onclick="backupAll()">📦 全部</button>
         </div>
         <div style="font-size:0.8rem;color:var(--text-light);">备份文件: ${backupList.length} 个</div>
       </div>
 
       <!-- 分类恢复 -->
-      <div style="background:var(--bg);padding:12px;border-radius:8px;">
+      <div style="background:var(--bg);padding:12px;border-radius:var(--radius-md);">
         <h4>📂 恢复数据</h4>
-        <div style="display:flex;flex-wrap:wrap;gap:6px;margin:8px 0;">
-          <button class="btn" onclick="restoreCategory()" style="padding:4px 12px;font-size:0.8rem;">从文件恢复</button>
-          <button class="btn" onclick="showBackupList()" style="padding:4px 12px;font-size:0.8rem;background:#17a2b8;">📋 查看备份</button>
+        <div class="btn-group" style="margin:8px 0;">
+          <button class="btn btn-sm" onclick="restoreCategory()">从文件恢复</button>
+          <button class="btn btn-sm btn-info" onclick="showBackupList()">📋 查看备份</button>
         </div>
         <div style="font-size:0.8rem;color:var(--text-light);">选择备份文件恢复对应数据</div>
       </div>
 
       <!-- 导出格式 -->
-      <div style="background:var(--bg);padding:12px;border-radius:8px;">
+      <div style="background:var(--bg);padding:12px;border-radius:var(--radius-md);">
         <h4>📤 导出格式</h4>
-        <select id="exportFormat" style="width:100%;padding:6px;border-radius:6px;border:1px solid #ddd;background:var(--bg);color:var(--text);" onchange="updateSetting('exportFormat',this.value)">
+        <select id="exportFormat" class="da-select" onchange="updateSetting('exportFormat',this.value)">
           <option value="json" ${settings.exportFormat==='json'?'selected':''}>JSON</option>
           <option value="excel" ${settings.exportFormat==='excel'?'selected':''}>Excel (.xlsx)</option>
         </select>
         <div style="margin-top:8px;">
-          <button class="btn" onclick="exportAllData()" style="padding:4px 16px;font-size:0.85rem;background:#28a745;">📥 导出全部数据</button>
+          <button class="btn btn-sm btn-success" onclick="exportAllData()">📥 导出全部数据</button>
         </div>
       </div>
 
       <!-- 选择性清除 -->
-      <div style="background:var(--bg);padding:12px;border-radius:8px;">
+      <div style="background:var(--bg);padding:12px;border-radius:var(--radius-md);">
         <h4>🗑️ 选择性清除</h4>
-        <div style="display:flex;flex-wrap:wrap;gap:6px;margin:8px 0;">
-          <button class="btn" onclick="clearCategory('lessonTasks')" style="padding:4px 12px;font-size:0.8rem;background:#dc3545;">备课</button>
-          <button class="btn" onclick="clearCategory('classData')" style="padding:4px 12px;font-size:0.8rem;background:#dc3545;">班级</button>
-          <button class="btn" onclick="clearCategory('examData')" style="padding:4px 12px;font-size:0.8rem;background:#dc3545;">试卷</button>
-          <button class="btn" onclick="clearCategory('attendanceData')" style="padding:4px 12px;font-size:0.8rem;background:#dc3545;">考勤</button>
-          <button class="btn" onclick="clearCategory('scheduleData')" style="padding:4px 12px;font-size:0.8rem;background:#dc3545;">课程表</button>
+        <div class="btn-group" style="margin:8px 0;">
+          <button class="btn btn-sm btn-danger" onclick="clearCategory('lessonTasks')">备课</button>
+          <button class="btn btn-sm btn-danger" onclick="clearCategory('classData')">班级</button>
+          <button class="btn btn-sm btn-danger" onclick="clearCategory('examData')">试卷</button>
+          <button class="btn btn-sm btn-danger" onclick="clearCategory('attendanceData')">考勤</button>
+          <button class="btn btn-sm btn-danger" onclick="clearCategory('scheduleData')">课程表</button>
         </div>
       </div>
 
       <!-- 自动备份 -->
-      <div style="background:var(--bg);padding:12px;border-radius:8px;grid-column:span 2;">
+      <div style="background:var(--bg);padding:12px;border-radius:var(--radius-md);grid-column:span 2;">
         <h4>🔄 自动备份</h4>
         <div style="display:flex;align-items:center;gap:12px;flex-wrap:wrap;">
           <label>
@@ -183,7 +186,7 @@ function renderDataTab(settings) {
           </label>
           <label>
             周期:
-            <select onchange="updateSetting('backupInterval',parseInt(this.value))" style="padding:4px 8px;border-radius:6px;border:1px solid #ddd;background:var(--bg);color:var(--text);">
+            <select class="da-select" onchange="updateSetting('backupInterval',parseInt(this.value))">
               <option value="1" ${settings.backupInterval===1?'selected':''}>每天</option>
               <option value="3" ${settings.backupInterval===3?'selected':''}>3天</option>
               <option value="7" ${settings.backupInterval===7?'selected':''}>7天</option>
@@ -203,56 +206,30 @@ function renderTeachingTab(settings) {
   const grades = settings.grades || ['高一', '高二', '高三'];
   return `
     <h3>📚 基础教学配置</h3>
-    <div style="display:grid;grid-template-columns:1fr 1fr;gap:16px;">
+    <div class="settings-grid">
 
-      <!-- 年级班级管理 -->
-      <div style="background:var(--bg);padding:12px;border-radius:8px;">
-        <h4>🏫 年级班级管理</h4>
-        <div style="display:flex;flex-wrap:wrap;gap:6px;margin:8px 0;">
-          ${grades.map(g => `<span style="background:var(--card-bg);padding:4px 12px;border-radius:30px;border:1px solid #ddd;display:inline-flex;align-items:center;gap:6px;">
-            ${g}
-            <span onclick="removeGrade('${g}')" style="cursor:pointer;color:#dc3545;">✕</span>
-          </span>`).join('')}
+      <!-- 年级管理 -->
+      <div class="settings-card">
+        <h4>🏫 年级管理</h4>
+        <div class="chip-row">
+          ${grades.map(g => `<span class="chip">${g}<span class="chip-x" onclick="removeGrade('${g}')" title="删除年级">✕</span></span>`).join('')}
         </div>
-        <div style="display:flex;gap:6px;margin-top:6px;">
-          <input type="text" id="newGradeInput" placeholder="新年级名称" style="flex:1;padding:4px 8px;border-radius:6px;border:1px solid #ddd;background:var(--bg);color:var(--text);" />
-          <button class="btn" onclick="addGrade()" style="padding:4px 12px;font-size:0.85rem;">添加</button>
+        <div class="inline-form">
+          <input type="text" id="newGradeInput" placeholder="新年级名称" />
+          <button class="btn btn-sm" onclick="addGrade()">添加</button>
         </div>
-        <div style="margin-top:8px;">
-          <label style="font-size:0.85rem;">班级管理</label>
-          <div id="classManager">
-            ${grades.map(g => `
-              <div style="display:flex;align-items:center;gap:6px;margin-top:4px;">
-                <span style="min-width:60px;font-weight:600;">${g}</span>
-                <input type="text" id="classInput_${g}" placeholder="班级名，逗号分隔" value="${(settings.classes[g]||[]).join('、')}" style="flex:1;padding:4px 8px;border-radius:6px;border:1px solid #ddd;background:var(--bg);color:var(--text);font-size:0.85rem;" />
-                <button class="btn" onclick="saveClasses('${g}')" style="padding:2px 10px;font-size:0.8rem;">保存</button>
-              </div>
-            `).join('')}
-          </div>
-        </div>
-      </div>
-
-      <!-- 教材版本 -->
-      <div style="background:var(--bg);padding:12px;border-radius:8px;">
-        <h4>📖 教材版本</h4>
-        <select id="textbookVersion" style="width:100%;padding:6px;border-radius:6px;border:1px solid #ddd;background:var(--bg);color:var(--text);" onchange="updateSetting('textbookVersion',this.value)">
-          <option value="统编版" ${settings.textbookVersion==='统编版'?'selected':''}>统编版（当前）</option>
-          <option value="人教版" ${settings.textbookVersion==='人教版'?'selected':''}>人教版</option>
-          <option value="苏教版" ${settings.textbookVersion==='苏教版'?'selected':''}>苏教版</option>
-          <option value="自定义" ${settings.textbookVersion==='自定义'?'selected':''}>自定义</option>
-        </select>
-        <div style="margin-top:8px;font-size:0.85rem;color:var(--text-light);">切换教材版本影响教材资源中心的数据展示</div>
+        <p class="hint">班级请在左侧「班级管理」模块维护；此处的年级仅作为通用标签（用于备课/课程表的年级下拉）。</p>
       </div>
 
       <!-- 学期时间 -->
-      <div style="background:var(--bg);padding:12px;border-radius:8px;grid-column:span 2;">
+      <div class="settings-card span-2">
         <h4>📅 学期时间设置</h4>
-        <div style="display:flex;gap:12px;flex-wrap:wrap;">
-          <label>开学日期: <input type="date" value="${settings.semester.start||''}" onchange="updateSemester('start',this.value)" style="padding:4px 8px;border-radius:6px;border:1px solid #ddd;background:var(--bg);color:var(--text);" /></label>
-          <label>结束日期: <input type="date" value="${settings.semester.end||''}" onchange="updateSemester('end',this.value)" style="padding:4px 8px;border-radius:6px;border:1px solid #ddd;background:var(--bg);color:var(--text);" /></label>
-          <label>考试周期: <input type="text" placeholder="期中/期末" value="${(settings.semester.examPeriods||[]).join('、')}" onchange="updateSemester('examPeriods',this.value.split('、').filter(Boolean))" style="padding:4px 8px;border-radius:6px;border:1px solid #ddd;background:var(--bg);color:var(--text);" /></label>
+        <div class="inline-form wrap">
+          <label>开学日期 <input type="date" value="${settings.semester.start||''}" onchange="updateSemester('start',this.value)" /></label>
+          <label>结束日期 <input type="date" value="${settings.semester.end||''}" onchange="updateSemester('end',this.value)" /></label>
+          <label>考试周期 <input type="text" placeholder="期中/期末" value="${(settings.semester.examPeriods||[]).join('、')}" onchange="updateSemester('examPeriods',this.value.split('、').filter(Boolean))" /></label>
         </div>
-        <div style="margin-top:6px;font-size:0.85rem;color:var(--text-light);">联动备课截止日期和上课日期的默认值</div>
+        <p class="hint">联动备课截止日期和上课日期的默认值</p>
       </div>
     </div>
   `;
@@ -265,7 +242,7 @@ function renderLessonTab(settings) {
     <div style="display:grid;grid-template-columns:1fr 1fr;gap:16px;">
 
       <!-- 默认备课模板 -->
-      <div style="background:var(--bg);padding:12px;border-radius:8px;grid-column:span 2;">
+      <div style="background:var(--bg);padding:12px;border-radius:var(--radius-md);grid-column:span 2;">
         <h4>📋 默认备课模板</h4>
         <div style="display:grid;grid-template-columns:1fr 1fr 1fr;gap:8px;">
           <div>
@@ -284,7 +261,7 @@ function renderLessonTab(settings) {
       </div>
 
       <!-- 教材展示设置 -->
-      <div style="background:var(--bg);padding:12px;border-radius:8px;">
+      <div style="background:var(--bg);padding:12px;border-radius:var(--radius-md);">
         <h4>📖 教材展示设置</h4>
         <div style="display:flex;flex-direction:column;gap:6px;margin-top:8px;">
           <label><input type="checkbox" ${settings.showTranslation?'checked':''} onchange="updateSetting('showTranslation',this.checked)" /> 默认显示译文</label>
@@ -294,12 +271,12 @@ function renderLessonTab(settings) {
       </div>
 
       <!-- 素材存储路径 -->
-      <div style="background:var(--bg);padding:12px;border-radius:8px;">
+      <div style="background:var(--bg);padding:12px;border-radius:var(--radius-md);">
         <h4>📁 素材存储</h4>
         <div style="font-size:0.85rem;color:var(--text-light);margin-top:8px;">
           <p>当前存储: localStorage（本地）</p>
           <p>已用空间: ${getStorageUsage()}</p>
-          <p style="font-size:0.75rem;color:#6c757d;">所有素材附件均存储在浏览器本地，建议定期备份。</p>
+          <p style="font-size:0.75rem;color:var(--text-light);">所有素材附件均存储在浏览器本地，建议定期备份。</p>
         </div>
       </div>
     </div>
@@ -313,7 +290,7 @@ function renderScoreTab(settings) {
     <div style="display:grid;grid-template-columns:1fr 1fr;gap:16px;">
 
       <!-- 分数区间 -->
-      <div style="background:var(--bg);padding:12px;border-radius:8px;">
+      <div style="background:var(--bg);padding:12px;border-radius:var(--radius-md);">
         <h4>📊 分数区间自定义</h4>
         <div style="display:grid;grid-template-columns:1fr 1fr;gap:6px;margin-top:8px;">
           <label>优秀 ≥ <input type="number" value="${settings.scoreRanges.excellent||90}" onchange="updateScoreRange('excellent',parseInt(this.value))" style="width:60px;padding:2px 4px;border-radius:4px;border:1px solid #ddd;background:var(--bg);color:var(--text);" /></label>
@@ -323,7 +300,7 @@ function renderScoreTab(settings) {
       </div>
 
       <!-- 预警阈值 -->
-      <div style="background:var(--bg);padding:12px;border-radius:8px;">
+      <div style="background:var(--bg);padding:12px;border-radius:var(--radius-md);">
         <h4>⚠️ 预警阈值设置</h4>
         <div style="display:grid;grid-template-columns:1fr 1fr;gap:6px;margin-top:8px;">
           <label>成绩下滑 ≥ <input type="number" value="${settings.alertThresholds.scoreDrop||10}" onchange="updateAlertThreshold('scoreDrop',parseInt(this.value))" style="width:60px;padding:2px 4px;border-radius:4px;border:1px solid #ddd;background:var(--bg);color:var(--text);" /> 分</label>
@@ -332,14 +309,10 @@ function renderScoreTab(settings) {
         <div style="margin-top:6px;font-size:0.85rem;color:var(--text-light);">超过阈值自动触发预警提醒</div>
       </div>
 
-      <!-- 报表样式 -->
-      <div style="background:var(--bg);padding:12px;border-radius:8px;grid-column:span 2;">
-        <h4>📄 报表导出默认样式</h4>
-        <div style="display:flex;gap:12px;flex-wrap:wrap;margin-top:8px;">
-          <label><input type="radio" name="reportStyle" ${settings.reportStyle==='compact'?'checked':''} onchange="updateSetting('reportStyle','compact')" /> 紧凑型</label>
-          <label><input type="radio" name="reportStyle" ${settings.reportStyle==='detailed'?'checked':''} onchange="updateSetting('reportStyle','detailed')" /> 详细型</label>
-          <label><input type="radio" name="reportStyle" ${!settings.reportStyle||settings.reportStyle==='default'?'checked':''} onchange="updateSetting('reportStyle','default')" /> 默认</label>
-        </div>
+      <!-- 报表样式已移除（无对应导出逻辑消费，属死字段） -->
+      <div style="background:var(--bg);padding:12px;border-radius:var(--radius-md);grid-column:span 2;">
+        <h4>📄 报表导出</h4>
+        <p class="hint">成绩与试卷报表将沿用系统默认排版导出；如需自定义报表样式，可在对应模块提出。</p>
       </div>
     </div>
   `;
@@ -349,51 +322,46 @@ function renderScoreTab(settings) {
 function renderUITab(settings) {
   return `
     <h3>🎨 界面与通用偏好</h3>
-    <div style="display:grid;grid-template-columns:1fr 1fr 1fr;gap:16px;">
+    <div class="settings-grid cols-3">
 
-      <!-- 主题 -->
-      <div style="background:var(--bg);padding:12px;border-radius:8px;">
+      <div class="settings-card">
         <h4>🎨 主题切换</h4>
-        <div style="display:flex;gap:8px;margin-top:8px;">
-          <button class="btn" onclick="updateSetting('theme','light');location.reload();" style="${settings.theme==='light'?'background:#4a6fa5':'background:#6c757d'};">☀️ 浅色</button>
-          <button class="btn" onclick="updateSetting('theme','dark');location.reload();" style="${settings.theme==='dark'?'background:#4a6fa5':'background:#6c757d'};">🌙 深色</button>
+        <div class="btn-group">
+          <button class="btn btn-secondary ${settings.theme==='light'?'active':''}" onclick="updateSetting('theme','light');renderTab('ui');">☀️ 浅色</button>
+          <button class="btn btn-secondary ${settings.theme==='dark'?'active':''}" onclick="updateSetting('theme','dark');renderTab('ui');">🌙 深色</button>
         </div>
       </div>
 
-      <!-- 列表视图 -->
-      <div style="background:var(--bg);padding:12px;border-radius:8px;">
+      <div class="settings-card">
         <h4>📋 默认视图</h4>
-        <div style="display:flex;gap:8px;margin-top:8px;">
-          <button class="btn" onclick="updateSetting('defaultView','list');location.reload();" style="${settings.defaultView==='list'?'background:#4a6fa5':'background:#6c757d'};">📋 列表</button>
-          <button class="btn" onclick="updateSetting('defaultView','kanban');location.reload();" style="${settings.defaultView==='kanban'?'background:#4a6fa5':'background:#6c757d'};">📊 看板</button>
+        <div class="btn-group">
+          <button class="btn btn-secondary ${settings.defaultView==='list'?'active':''}" onclick="updateSetting('defaultView','list');location.reload();">📋 列表</button>
+          <button class="btn btn-secondary ${settings.defaultView==='kanban'?'active':''}" onclick="updateSetting('defaultView','kanban');location.reload();">📊 看板</button>
         </div>
       </div>
 
-      <!-- 字体大小 -->
-      <div style="background:var(--bg);padding:12px;border-radius:8px;">
+      <div class="settings-card">
         <h4>🔤 字体大小</h4>
-        <div style="display:flex;gap:8px;margin-top:8px;">
-          <button class="btn" onclick="updateSetting('fontSize','small');location.reload();" style="${settings.fontSize==='small'?'background:#4a6fa5':'background:#6c757d'};">小</button>
-          <button class="btn" onclick="updateSetting('fontSize','medium');location.reload();" style="${settings.fontSize==='medium'?'background:#4a6fa5':'background:#6c757d'};">中</button>
-          <button class="btn" onclick="updateSetting('fontSize','large');location.reload();" style="${settings.fontSize==='large'?'background:#4a6fa5':'background:#6c757d'};">大</button>
+        <div class="btn-group">
+          <button class="btn btn-secondary ${settings.fontSize==='small'?'active':''}" onclick="updateSetting('fontSize','small');renderTab('ui');">小</button>
+          <button class="btn btn-secondary ${settings.fontSize==='medium'?'active':''}" onclick="updateSetting('fontSize','medium');renderTab('ui');">中</button>
+          <button class="btn btn-secondary ${settings.fontSize==='large'?'active':''}" onclick="updateSetting('fontSize','large');renderTab('ui');">大</button>
         </div>
       </div>
 
-      <!-- 侧边栏 -->
-      <div style="background:var(--bg);padding:12px;border-radius:8px;">
+      <div class="settings-card">
         <h4>📂 侧边栏</h4>
-        <div style="display:flex;gap:8px;margin-top:8px;">
-          <button class="btn" onclick="updateSetting('sidebarCollapsed',false);location.reload();" style="${!settings.sidebarCollapsed?'background:#4a6fa5':'background:#6c757d'};">展开</button>
-          <button class="btn" onclick="updateSetting('sidebarCollapsed',true);location.reload();" style="${settings.sidebarCollapsed?'background:#4a6fa5':'background:#6c757d'};">收起</button>
+        <div class="btn-group">
+          <button class="btn btn-secondary ${!settings.sidebarCollapsed?'active':''}" onclick="updateSetting('sidebarCollapsed',false);renderTab('ui');">展开</button>
+          <button class="btn btn-secondary ${settings.sidebarCollapsed?'active':''}" onclick="updateSetting('sidebarCollapsed',true);renderTab('ui');">收起</button>
         </div>
       </div>
 
-      <!-- 通知开关 -->
-      <div style="background:var(--bg);padding:12px;border-radius:8px;grid-column:span 2;">
+      <div class="settings-card span-2">
         <h4>🔔 通知弹窗</h4>
-        <div style="display:flex;gap:8px;margin-top:8px;">
+        <div class="inline-form">
           <label><input type="checkbox" ${settings.notificationsEnabled!==false?'checked':''} onchange="updateSetting('notificationsEnabled',this.checked)" /> 启用通知</label>
-          <span style="font-size:0.85rem;color:var(--text-light);margin-left:12px;">任务到期、学情异常时弹出提醒</span>
+          <span class="hint">任务到期、学情异常时弹出提醒</span>
         </div>
       </div>
     </div>
@@ -402,133 +370,55 @@ function renderUITab(settings) {
 
 // ========== 六、系统 ==========
 
-// ---- 修改密码界面 ----
-function renderAccountTab(settings) {
-  const user = getCurrentAuthUser();
-  if (!user) return '<p>请先登录</p>';
-  
-  return `
-    <h3>🔐 账户安全</h3>
-    <div style="background:var(--bg);padding:16px;border-radius:8px;max-width:400px;">
-      <p style="margin-bottom:12px;">当前用户：<strong>${user.username}</strong>（${user.role === 'admin' ? '管理员' : '教师'}）</p>
-      <div class="form-group">
-        <label>原密码</label>
-        <input type="password" id="oldPwdInput" style="width:100%;padding:8px;border-radius:6px;border:1px solid #ddd;background:var(--bg);color:var(--text);" />
-      </div>
-      <div class="form-group">
-        <label>新密码</label>
-        <input type="password" id="newPwdInput" style="width:100%;padding:8px;border-radius:6px;border:1px solid #ddd;background:var(--bg);color:var(--text);" />
-      </div>
-      <div class="form-group">
-        <label>确认新密码</label>
-        <input type="password" id="confirmPwdInput" style="width:100%;padding:8px;border-radius:6px;border:1px solid #ddd;background:var(--bg);color:var(--text);" />
-      </div>
-      <button class="btn" onclick="handleChangePassword()" style="background:#4a6fa5;">修改密码</button>
-      <div id="pwdResult" style="margin-top:8px;color:#28a745;"></div>
-    </div>
-  `;
-}
-
-// 修改密码处理函数
-function handleChangePassword() {
-  const oldPwd = document.getElementById('oldPwdInput').value;
-  const newPwd = document.getElementById('newPwdInput').value;
-  const confirmPwd = document.getElementById('confirmPwdInput').value;
-  const resultEl = document.getElementById('pwdResult');
-  
-  if (newPwd !== confirmPwd) {
-    resultEl.style.color = '#dc3545';
-    resultEl.textContent = '两次密码不一致';
-    return;
-  }
-  
-  const user = getCurrentAuthUser();
-  if (!user) {
-    resultEl.style.color = '#dc3545';
-    resultEl.textContent = '请先登录';
-    return;
-  }
-  
-  const result = authChangePassword(user.username, oldPwd, newPwd);
-  resultEl.style.color = result.success ? '#28a745' : '#dc3545';
-  resultEl.textContent = result.message;
-  
-  if (result.success) {
-    document.getElementById('oldPwdInput').value = '';
-    document.getElementById('newPwdInput').value = '';
-    document.getElementById('confirmPwdInput').value = '';
-  }
-}
-
-window.handleChangePassword = handleChangePassword;
+// 账户安全：单机公开分发版「打开即用」，无登录拦截，修改密码入口已移除。
+// 若未来接入 auth.js 的真实账号体系，可在此恢复 renderAccountTab / handleChangePassword。
 
 function renderSystemTab(settings) {
   const logs = JSON.parse(localStorage.getItem(LOG_KEY) || '[]');
   return `
     <h3>🖥️ 系统与本地存储</h3>
-    <div style="display:grid;grid-template-columns:1fr 1fr;gap:16px;">
+    <div class="settings-grid">
 
-      <!-- 存储占用 -->
-      <div style="background:var(--bg);padding:12px;border-radius:8px;">
+      <div class="settings-card">
         <h4>💾 存储占用</h4>
-        <div style="margin-top:8px;">
-          <div style="display:flex;justify-content:space-between;font-size:0.9rem;">
+        <div class="storage-bar-wrap">
+          <div class="storage-bar-row">
             <span>已用空间</span>
             <span id="storageUsed">${getStorageUsage()}</span>
           </div>
-          <div style="width:100%;height:8px;background:#e9ecef;border-radius:4px;margin-top:4px;overflow:hidden;">
-            <div id="storageBar" style="height:100%;background:#4a6fa5;width:${getStoragePercent()}%;border-radius:4px;"></div>
-          </div>
-          <div style="display:flex;justify-content:space-between;font-size:0.75rem;color:var(--text-light);margin-top:2px;">
-            <span>0 MB</span>
-            <span id="storageLimit">~5 MB</span>
-          </div>
+          <div class="storage-bar"><div class="storage-bar-fill" style="width:${getStoragePercent()}%"></div></div>
+          <div class="storage-bar-scale"><span>0 MB</span><span id="storageLimit">~10 MB</span></div>
         </div>
+        <p class="hint">数据保存在浏览器本地（localStorage），建议定期备份。</p>
       </div>
 
-      <!-- 缓存清理 -->
-      <div style="background:var(--bg);padding:12px;border-radius:8px;">
-        <h4>🧹 缓存清理</h4>
-        <div style="display:flex;flex-wrap:wrap;gap:6px;margin-top:8px;">
-          <button class="btn" onclick="clearCache('images')" style="padding:4px 12px;font-size:0.8rem;background:#dc3545;">清理图片缓存</button>
-          <button class="btn" onclick="clearCache('attachments')" style="padding:4px 12px;font-size:0.8rem;background:#dc3545;">清理附件缓存</button>
-          <button class="btn" onclick="clearCache('all')" style="padding:4px 12px;font-size:0.8rem;background:#dc3545;">清理全部缓存</button>
-        </div>
-        <div style="font-size:0.8rem;color:var(--text-light);margin-top:6px;">只清理临时缓存，不删除业务数据</div>
-      </div>
-
-      <!-- 版本检测 -->
-      <div style="background:var(--bg);padding:12px;border-radius:8px;">
+      <div class="settings-card">
         <h4>📌 版本信息</h4>
-        <div style="margin-top:8px;font-size:0.9rem;">
-          <p>当前版本: <strong>语文智备Pro v3.0</strong></p>
-          <p>上次更新: 2026-07-08</p>
-          <button class="btn" onclick="checkUpdate()" style="padding:4px 16px;font-size:0.85rem;background:#17a2b8;">🔄 检查更新</button>
-        </div>
+        <p>当前版本: <strong>${APP_VERSION}</strong></p>
+        <p>上次更新: ${APP_UPDATE_DATE}</p>
+        <button class="btn btn-sm" onclick="checkUpdate()">🔄 检查更新</button>
       </div>
 
-      <!-- 重置配置 -->
-      <div style="background:var(--bg);padding:12px;border-radius:8px;">
+      <div class="settings-card">
         <h4>🔄 重置系统</h4>
-        <div style="display:flex;flex-wrap:wrap;gap:6px;margin-top:8px;">
-          <button class="btn" onclick="resetSettings()" style="padding:4px 12px;font-size:0.8rem;background:#ffc107;">重置设置</button>
-          <button class="btn" onclick="resetAll()" style="padding:4px 12px;font-size:0.8rem;background:#dc3545;">⚠️ 恢复出厂</button>
+        <div class="btn-group wrap">
+          <button class="btn btn-sm btn-warning" onclick="resetSettings()">重置设置</button>
+          <button class="btn btn-sm btn-danger" onclick="resetAll()">⚠️ 恢复出厂</button>
         </div>
-        <div style="font-size:0.8rem;color:var(--text-light);margin-top:6px;">重置设置不影响业务数据，恢复出厂将清除所有数据</div>
+        <p class="hint">重置设置不影响业务数据，恢复出厂将清除所有数据。</p>
       </div>
 
-      <!-- 操作日志 -->
-      <div style="background:var(--bg);padding:12px;border-radius:8px;grid-column:span 2;">
+      <div class="settings-card span-2">
         <h4>📋 操作日志（最近10条）</h4>
-        <div style="max-height:150px;overflow-y:auto;margin-top:8px;font-size:0.85rem;">
+        <div class="log-list">
           ${logs.slice(0,10).map(log =>
-            `<div style="padding:4px 8px;border-bottom:1px solid #eee;display:flex;justify-content:space-between;">
+            `<div class="log-item">
               <span>${log.action} ${log.detail||''}</span>
-              <span style="color:var(--text-light);font-size:0.75rem;">${new Date(log.time).toLocaleString()}</span>
+              <span class="log-time">${new Date(log.time).toLocaleString()}</span>
             </div>`
-          ).join('') || '<div style="color:var(--text-light);padding:8px;">暂无操作记录</div>'}
+          ).join('') || '<div class="hint">暂无操作记录</div>'}
         </div>
-        <button class="btn" onclick="clearLogs()" style="padding:2px 12px;font-size:0.8rem;background:#dc3545;margin-top:6px;">清空日志</button>
+        <button class="btn btn-sm btn-danger" onclick="clearLogs()">清空日志</button>
       </div>
     </div>
   `;
@@ -539,7 +429,7 @@ function renderLogTab(settings) {
   const logs = JSON.parse(localStorage.getItem(LOG_KEY) || '[]');
   return `
     <h3>📋 完整操作日志</h3>
-    <div style="background:var(--bg);padding:12px;border-radius:8px;max-height:500px;overflow-y:auto;">
+    <div style="background:var(--bg);padding:12px;border-radius:var(--radius-md);max-height:500px;overflow-y:auto;">
       ${logs.length===0?'<div style="color:var(--text-light);padding:20px;text-align:center;">暂无操作记录</div>':
         logs.map(log =>
           `<div style="padding:6px 12px;border-bottom:1px solid #eee;display:flex;justify-content:space-between;align-items:center;">
@@ -553,11 +443,92 @@ function renderLogTab(settings) {
       }
     </div>
     <div style="margin-top:8px;display:flex;gap:8px;">
-      <button class="btn" onclick="clearLogs()" style="padding:4px 16px;background:#dc3545;">清空所有日志</button>
-      <button class="btn" onclick="exportLogs()" style="padding:4px 16px;background:#28a745;">导出日志</button>
+      <button class="btn btn-danger" onclick="clearLogs()">清空所有日志</button>
+      <button class="btn btn-success" onclick="exportLogs()">导出日志</button>
     </div>
   `;
 }
+
+// ========== 帮助与关于 ==========
+function renderHelpTab(settings) {
+  return `
+    <h3>❓ 帮助与关于</h3>
+    <div class="settings-grid">
+      <div class="settings-card span-2">
+        <h4>📌 关于本应用</h4>
+        <p>版本：<strong>${APP_VERSION}</strong>（更新于 ${APP_UPDATE_DATE}）</p>
+        <p>面向高中语文教师的备课与班级管理工具，纯前端 PWA，数据保存在本机浏览器。</p>
+      </div>
+      <div class="settings-card">
+        <h4>💾 数据备份建议</h4>
+        <ul class="help-list">
+          <li>在「数据管理」中可分类备份/恢复，或导出全部数据为 JSON。</li>
+          <li>建议开启自动备份（按周期自动留存历史备份）。</li>
+          <li>更换设备或浏览器前，务必先「导出全部数据」。</li>
+        </ul>
+        <button class="btn btn-sm" onclick="restoreCategory()">📂 从备份恢复数据</button>
+      </div>
+      <div class="settings-card">
+        <h4>🔄 数据迁移向导</h4>
+        <p class="hint">旧版本或他处导出的备份文件，可点上方「从备份恢复数据」一键导入；分类备份会保留多个历史版本。</p>
+      </div>
+      <div class="settings-card span-2">
+        <h4>⌨️ 使用提示</h4>
+        <ul class="help-list">
+          <li>顶部搜索框可快速检索课文、班级、备课与待办。</li>
+          <li>教材详情页支持全文/拼音/注释/译文/讲解/赏析/考点切换与语音朗读。</li>
+          <li>工作台首页可查看当日剩余课程、备课与待办。</li>
+        </ul>
+      </div>
+    </div>
+  `;
+}
+
+// ========== 自动备份（由 app.js 启动时调用） ==========
+function runAutoBackupIfNeeded() {
+  const s = loadSettings();
+  if (!s.autoBackup) return;
+  const last = parseInt(localStorage.getItem('lastAutoBackup') || '0', 10);
+  const intervalMs = (s.backupInterval || 7) * 86400000;
+  if (Date.now() - last < intervalMs) return;
+  const keys = ['lessonTasks', 'classData', 'examData', 'attendanceData', 'scheduleData'];
+  const nameMap = { lessonTasks: '备课', classData: '班级', examData: '试卷', attendanceData: '考勤', scheduleData: '课程表' };
+  const backups = JSON.parse(localStorage.getItem(BACKUP_KEY) || '[]');
+  const stamp = new Date().toISOString();
+  keys.forEach(k => {
+    const data = localStorage.getItem(k);
+    if (data) backups.push({ id: Date.now().toString(36) + '_' + k, key: k, name: nameMap[k] || k, data, time: stamp, auto: true });
+  });
+  while (backups.length > 50) backups.shift();
+  localStorage.setItem(BACKUP_KEY, JSON.stringify(backups));
+  localStorage.setItem('lastAutoBackup', String(Date.now()));
+  addLog('自动备份', '已完成');
+}
+
+// ========== 备份列表（UI 化，替代 alert/prompt） ==========
+function restoreBackupByIdx(idx) {
+  const backups = JSON.parse(localStorage.getItem(BACKUP_KEY) || '[]');
+  const b = backups[idx];
+  if (!b) return;
+  if (!confirm(`确定恢复备份「${b.name}」？当前对应数据将被覆盖。`)) return;
+  localStorage.setItem(b.key, b.data);
+  addLog('恢复', `${b.name} (${b.key})`);
+  alert(`✅ ${b.name} 已恢复`);
+  location.reload();
+}
+
+function deleteBackupByIdx(idx) {
+  const backups = JSON.parse(localStorage.getItem(BACKUP_KEY) || '[]');
+  if (!confirm('确定删除该备份？')) return;
+  backups.splice(idx, 1);
+  localStorage.setItem(BACKUP_KEY, JSON.stringify(backups));
+  addLog('删除备份', '');
+  showBackupList();
+}
+
+window.runAutoBackupIfNeeded = runAutoBackupIfNeeded;
+window.restoreBackupByIdx = restoreBackupByIdx;
+window.deleteBackupByIdx = deleteBackupByIdx;
 
 // ========== 功能函数 ==========
 
@@ -624,22 +595,29 @@ function restoreCategory() {
 
 function showBackupList() {
   const backups = JSON.parse(localStorage.getItem(BACKUP_KEY) || '[]');
-  if (backups.length === 0) {
-    alert('暂无备份记录');
-    return;
-  }
-  const list = backups.map((b, i) =>
-    `${i+1}. ${b.name} - ${new Date(b.time).toLocaleString()}`
-  ).join('\n');
-  alert(`📋 备份列表:\n\n${list}\n\n点击确认后选择要恢复的备份序号:`);
-  const idx = parseInt(prompt('请输入要恢复的备份序号:'));
-  if (idx > 0 && idx <= backups.length) {
-    const b = backups[idx - 1];
-    localStorage.setItem(b.key, b.data);
-    addLog('恢复', `${b.name} (${b.key})`);
-    alert(`✅ ${b.name} 已恢复`);
-    location.reload();
-  }
+  const content = document.getElementById('settingsContent');
+  if (!content) return;
+  content.innerHTML = `
+    <h3>📋 备份列表（${backups.length}）</h3>
+    <div class="settings-grid">
+      <div class="settings-card span-2">
+        ${backups.length === 0
+          ? '<p class="hint">暂无备份记录，可在「数据管理」中创建分类或全量备份。</p>'
+          : `<div class="backup-list">` + backups.slice().reverse().map((b, i) => {
+              const idx = backups.length - 1 - i;
+              return `<div class="backup-item">
+                <div class="backup-meta"><strong>${b.name}</strong> <span class="hint">${new Date(b.time).toLocaleString()}</span>${b.auto ? ' <span class="tag-auto">自动</span>' : ''}</div>
+                <div class="btn-group">
+                  <button class="btn btn-sm" onclick="restoreBackupByIdx(${idx})">恢复</button>
+                  <button class="btn btn-sm btn-danger" onclick="deleteBackupByIdx(${idx})">删除</button>
+                </div>
+              </div>`;
+            }).join('') + `</div>`
+        }
+        <button class="btn btn-sm" onclick="renderTab('data')" style="margin-top:8px;">← 返回数据管理</button>
+      </div>
+    </div>
+  `;
 }
 
 function clearCategory(key) {
@@ -662,10 +640,26 @@ function exportAllData() {
     settings: settings,
     exportTime: new Date().toISOString()
   };
+  const date = new Date().toISOString().slice(0, 10);
+  // Excel 模式：用已内置的 SheetJS 生成真实 .xlsx（每个分类一个 sheet，内容为对应 JSON 文本，可再导入）
+  if (format === 'excel' && typeof XLSX !== 'undefined') {
+    const wb = XLSX.utils.book_new();
+    const sheets = { '备课': data.lessonTasks, '班级': data.classData, '试卷': data.examData, '考勤': data.attendanceData, '课程表': data.scheduleData };
+    Object.keys(sheets).forEach(name => {
+      const val = sheets[name];
+      const arr = Array.isArray(val) ? val : [val];
+      const ws = XLSX.utils.json_to_sheet(arr.map(r => ({ '数据(JSON)': JSON.stringify(r) })));
+      XLSX.utils.book_append_sheet(wb, ws, name);
+    });
+    XLSX.writeFile(wb, `全部数据_${date}.xlsx`);
+    addLog('导出', '全部数据(Excel)');
+    alert('✅ 数据已导出为 Excel');
+    return;
+  }
   const blob = new Blob([JSON.stringify(data, null, 2)], { type: 'application/json' });
   const a = document.createElement('a');
   a.href = URL.createObjectURL(blob);
-  a.download = `全部数据_${new Date().toISOString().slice(0,10)}.${format==='excel'?'xlsx':'json'}`;
+  a.download = `全部数据_${date}.json`;
   a.click();
   addLog('导出', '全部数据');
   alert('✅ 数据已导出');
@@ -686,8 +680,6 @@ function addGrade() {
   if (!settings.grades) settings.grades = [];
   if (settings.grades.includes(name)) { alert('该年级已存在'); return; }
   settings.grades.push(name);
-  if (!settings.classes) settings.classes = {};
-  settings.classes[name] = [];
   saveSettings(settings);
   addLog('添加年级', name);
   input.value = '';
@@ -698,22 +690,12 @@ function removeGrade(grade) {
   if (!confirm(`确定删除 ${grade} 吗？`)) return;
   const settings = loadSettings();
   settings.grades = settings.grades.filter(g => g !== grade);
-  delete settings.classes[grade];
   saveSettings(settings);
   addLog('删除年级', grade);
   renderTab('teaching');
 }
 
-function saveClasses(grade) {
-  const input = document.getElementById(`classInput_${grade}`);
-  const classes = input.value.split('、').map(s => s.trim()).filter(Boolean);
-  const settings = loadSettings();
-  if (!settings.classes) settings.classes = {};
-  settings.classes[grade] = classes;
-  saveSettings(settings);
-  addLog('编辑班级', `${grade}: ${classes.join('、')}`);
-  alert(`✅ ${grade} 班级已保存`);
-}
+// saveClasses：班级统一由「班级管理」模块（class-data.js）维护，设置中的班级编辑已移除。
 
 function updateSemester(field, value) {
   const settings = loadSettings();
@@ -776,31 +758,10 @@ function getStoragePercent() {
   return Math.min((total / max) * 100, 100);
 }
 
-function clearCache(type) {
-  if (!confirm(`确定清理${type==='images'?'图片':type==='attachments'?'附件':'全部'}缓存吗？`)) return;
-  // 仅清理本应用命名空间下的缓存键（tp_cache_ 前缀）；当前版本图片/附件不落 localStorage，无缓存时如实告知
-  let removed = 0;
-  const keys = [];
-  for (let i = 0; i < localStorage.length; i++) {
-    const k = localStorage.key(i);
-    if (k && k.indexOf('tp_cache_') === 0) keys.push(k);
-  }
-  if (type === 'all') {
-    keys.forEach(k => { localStorage.removeItem(k); removed++; });
-  } else {
-    const prefix = type === 'images' ? 'tp_cache_img_' : 'tp_cache_att_';
-    keys.filter(k => k.indexOf(prefix) === 0).forEach(k => { localStorage.removeItem(k); removed++; });
-  }
-  if (removed > 0) {
-    alert(`✅ 已清理 ${removed} 项缓存`);
-  } else {
-    alert('暂无缓存可清理（当前版本图片/附件不持久化到本地）');
-  }
-  addLog('清理缓存', type + (removed > 0 ? `(${removed})` : '(空)'));
-}
+// 缓存清理：当前版本图片/附件均不持久化到 localStorage，无本地缓存可清，功能已下线。
 
 function checkUpdate() {
-  alert('当前已是最新版本 v3.0\n(检查更新功能需要联网)');
+  alert(`当前版本：${APP_VERSION}\n更新日期：${APP_UPDATE_DATE}\n\n本应用为 GitHub Pages 静态分发版，暂不支持在线更新；\n获取新版本请从仓库拉取最新文件覆盖本地。`);
 }
 
 function resetSettings() {
@@ -847,14 +808,15 @@ function renderTab(tab) {
     'score': renderScoreTab,
     'ui': renderUITab,
     'system': renderSystemTab,
-    'log': renderLogTab
+    'log': renderLogTab,
+    'help': renderHelpTab
   };
   if (map[tab]) {
     content.innerHTML = map[tab](settings);
   }
-  // 高亮按钮
+  // 高亮按钮：用 active 类切换（统一主色 / 暗色自动适配）
   document.querySelectorAll('[data-tab]').forEach(btn => {
-    btn.style.background = btn.dataset.tab === tab ? '#4a6fa5' : '#6c757d';
+    btn.classList.toggle('active', btn.dataset.tab === tab);
   });
 }
 
@@ -870,9 +832,6 @@ function initSettings() {
   // 应用当前设置
   const settings = loadSettings();
   applySettings(settings);
-
-  // 日志：进入设置
-  addLog('查看', '设置中心');
 }
 
 // ========== 暴露全局 ==========
@@ -887,7 +846,7 @@ window.clearCategory = clearCategory;
 window.exportAllData = exportAllData;
 window.addGrade = addGrade;
 window.removeGrade = removeGrade;
-window.saveClasses = saveClasses;
+// window.saveClasses 已移除（班级统一由「班级管理」模块维护）
 window.updateSemester = updateSemester;
 window.updateTemplate = updateTemplate;
 window.updateScoreRange = updateScoreRange;
@@ -895,7 +854,7 @@ window.updateAlertThreshold = updateAlertThreshold;
 window.updateSetting = updateSetting;
 window.getStorageUsage = getStorageUsage;
 window.getStoragePercent = getStoragePercent;
-window.clearCache = clearCache;
+// window.clearCache 已移除（缓存清理为无效空壳，功能下线）
 window.checkUpdate = checkUpdate;
 window.resetSettings = resetSettings;
 window.resetAll = resetAll;

@@ -85,34 +85,34 @@ function renderScoreboard() {
   if (sorted.length === 0) {
     return `
       <div class="card">
-        <h2>🏆 学生积分榜</h2>
-        <p style="color:#7f8c8d;text-align:center;padding:30px;">暂无学生数据，请先在「班级管理」中添加学生</p>
+        <div class="panel-head"><h2 class="panel-title">🏆 学生积分榜</h2></div>
+        <p class="empty">暂无学生数据，请先在「班级管理」中添加学生</p>
       </div>
     `;
   }
   
   let html = `
     <div class="card">
-      <h2>🏆 学生积分榜</h2>
-      <div style="display:flex;gap:8px;margin-bottom:12px;flex-wrap:wrap;">
-        <button class="btn" onclick="addScoreToAll()" style="background:#28a745;">＋ 批量加分</button>
-        <button class="btn" onclick="exportScoreReport()" style="background:#4a6fa5;">📤 导出报表</button>
-        <button class="btn" onclick="resetAllScores()" style="background:#dc3545;">🔄 重置</button>
-        <span style="font-size:0.85rem;color:var(--text-light);line-height:2.4;">共 ${sorted.length} 名学生</span>
+      <div class="panel-head"><h2 class="panel-title">🏆 学生积分榜</h2></div>
+      <div class="toolbar">
+        <button class="btn btn-success" onclick="addScoreToAll()">＋ 批量加分</button>
+        <button class="btn" onclick="exportScoreReport()">📤 导出报表</button>
+        <button class="btn btn-danger" onclick="resetAllScores()">🔄 重置</button>
+        <span class="toolbar-end" style="font-size:0.85rem;color:var(--text-light);line-height:2.4;">共 ${sorted.length} 名学生</span>
       </div>
       <div style="overflow-x:auto;">
-        <table style="width:100%;border-collapse:collapse;font-size:0.9rem;">
+        <table class="ui-table">
           <thead>
-            <tr style="background:#f0f4f8;">
-              <th style="padding:8px 10px;text-align:center;">🏆 排名</th>
-              <th style="padding:8px 10px;text-align:left;">姓名</th>
-              <th style="padding:8px 10px;text-align:center;">德</th>
-              <th style="padding:8px 10px;text-align:center;">智</th>
-              <th style="padding:8px 10px;text-align:center;">体</th>
-              <th style="padding:8px 10px;text-align:center;">美</th>
-              <th style="padding:8px 10px;text-align:center;">劳</th>
-              <th style="padding:8px 10px;text-align:center;font-weight:700;">总分</th>
-              <th style="padding:8px 10px;text-align:center;">操作</th>
+            <tr>
+              <th style="text-align:center;">🏆 排名</th>
+              <th style="text-align:left;">姓名</th>
+              <th style="text-align:center;">德</th>
+              <th style="text-align:center;">智</th>
+              <th style="text-align:center;">体</th>
+              <th style="text-align:center;">美</th>
+              <th style="text-align:center;">劳</th>
+              <th style="text-align:center;font-weight:700;">总分</th>
+              <th style="text-align:center;">操作</th>
             </tr>
           </thead>
           <tbody>
@@ -132,9 +132,9 @@ function renderScoreboard() {
         <td style="padding:6px 10px;text-align:center;"><input type="number" value="${item.scores.ti}" min="0" max="100" onchange="updateScore('${item.id}','ti',this.value)" style="width:40px;padding:2px 4px;border-radius:4px;border:1px solid #ddd;background:var(--bg);color:var(--text);text-align:center;" /></td>
         <td style="padding:6px 10px;text-align:center;"><input type="number" value="${item.scores.mei}" min="0" max="100" onchange="updateScore('${item.id}','mei',this.value)" style="width:40px;padding:2px 4px;border-radius:4px;border:1px solid #ddd;background:var(--bg);color:var(--text);text-align:center;" /></td>
         <td style="padding:6px 10px;text-align:center;"><input type="number" value="${item.scores.lao}" min="0" max="100" onchange="updateScore('${item.id}','lao',this.value)" style="width:40px;padding:2px 4px;border-radius:4px;border:1px solid #ddd;background:var(--bg);color:var(--text);text-align:center;" /></td>
-        <td style="padding:6px 10px;text-align:center;font-weight:700;color:#4a6fa5;font-size:1.1rem;">${item.total}</td>
+        <td style="padding:6px 10px;text-align:center;font-weight:700;color:var(--c-primary);font-size:1.1rem;">${item.total}</td>
         <td style="padding:6px 10px;text-align:center;">
-          <button onclick="viewStudentHistory('${item.id}')" style="background:none;border:none;color:#4a6fa5;cursor:pointer;font-size:0.85rem;">📊 趋势</button>
+          <button class="da-link" onclick="viewStudentHistory('${item.id}')">📊 趋势</button>
         </td>
       </tr>
     `;
@@ -200,18 +200,18 @@ function viewStudentHistory(studentId) {
       <div style="margin-top:12px;display:grid;grid-template-columns:1fr 1fr 1fr;gap:8px;font-size:0.85rem;">
         <div style="background:var(--bg);padding:8px;border-radius:6px;text-align:center;">
           <span style="color:var(--text-light);">当前总分</span>
-          <div style="font-weight:700;font-size:1.2rem;color:#4a6fa5;">${student.total}</div>
+          <div style="font-weight:700;font-size:1.2rem;color:var(--c-primary);">${student.total}</div>
         </div>
         <div style="background:var(--bg);padding:8px;border-radius:6px;text-align:center;">
           <span style="color:var(--text-light);">最高分</span>
-          <div style="font-weight:700;font-size:1.2rem;color:#28a745;">${Math.max(...data)}</div>
+          <div style="font-weight:700;font-size:1.2rem;color:var(--c-success);">${Math.max(...data)}</div>
         </div>
         <div style="background:var(--bg);padding:8px;border-radius:6px;text-align:center;">
           <span style="color:var(--text-light);">变化趋势</span>
-          <div style="font-weight:700;font-size:1.2rem;color:${data[data.length-1] > data[0] ? '#28a745' : '#dc3545'};">${data[data.length-1] > data[0] ? '📈 上升' : '📉 下降'}</div>
+          <div style="font-weight:700;font-size:1.2rem;color:${data[data.length-1] > data[0] ? 'var(--c-success)' : 'var(--c-danger)'};">${data[data.length-1] > data[0] ? '📈 上升' : '📉 下降'}</div>
         </div>
       </div>
-      <button onclick="closeOverlay('historyOverlay')" style="margin-top:12px;width:100%;padding:8px;border-radius:6px;border:none;background:#6c757d;color:#fff;cursor:pointer;">关闭</button>
+      <button class="btn btn-secondary btn-block" onclick="closeOverlay('historyOverlay')">关闭</button>
     </div>
   `;
   document.body.appendChild(overlay);
