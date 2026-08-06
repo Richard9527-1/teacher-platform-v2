@@ -555,13 +555,13 @@ function renderResource() {
         <button class="btn btn-sm btn-secondary" id="tabWenyan">📜 文言文</button>
         <button class="btn btn-sm btn-secondary" id="tabPoetry">📝 古诗词</button>
         <button class="btn btn-sm btn-secondary" id="tabExport">📥 导出</button>
-        <select id="filterGrade" class="da-select">
+        <select id="filterGrade" class="da-select resource-filter-select">
           <option value="">年级</option>
           <option value="高一">高一</option>
           <option value="高二">高二</option>
           <option value="高三">高三</option>
         </select>
-        <select id="filterUnit" class="da-select">
+        <select id="filterUnit" class="da-select resource-filter-select">
           <option value="">单元</option>
           <option value="第一单元">第一单元</option>
           <option value="第二单元">第二单元</option>
@@ -571,7 +571,7 @@ function renderResource() {
           <option value="第八单元">第八单元</option>
           <option value="古诗词诵读">古诗词诵读</option>
         </select>
-        <select id="filterType" class="da-select">
+        <select id="filterType" class="da-select resource-filter-select">
           <option value="">类型</option>
           <option value="课文">课文</option>
           <option value="文言文">文言文</option>

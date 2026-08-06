@@ -1557,6 +1557,9 @@ body.nav-open .nav-backdrop { display: block; }
 .da-btn-secondary:hover { background:#5a6268; }
 .da-select { padding:7px 12px; border-radius:8px; border:1px solid #d4d9e0; background:#fff; color:#2c3e50; font-size:0.88rem; }
 
+/* 教材资源中心：年级/单元/类型下拉框缩短，保证一行横向展示 */
+.resource-filter-select { min-width:72px; width:96px; flex:0 0 auto; padding:5px 8px; font-size:0.82rem; }
+
 .da-kpi-row { display:grid; grid-template-columns:repeat(auto-fit,minmax(120px,1fr)); gap:12px; margin:6px 0 16px; }
 .da-kpi { background:#f0f4f8; border-radius:10px; padding:12px 14px; }
 .da-kpi-label { font-size:0.8rem; color:#6c7a89; margin-bottom:6px; }
