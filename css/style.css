@@ -1355,3 +1355,53 @@ body.nav-open .nav-backdrop { display: block; }
   }
 }
 
+/* ===== 数据分析模块样式（.da-*） ===== */
+.da-toolbar { display:flex; gap:8px; flex-wrap:wrap; align-items:center; margin-bottom:14px; }
+.da-btn { background:#fff; color:#2c3e50; border:1px solid #d4d9e0; border-radius:8px; padding:7px 12px; font-size:0.88rem; cursor:pointer; white-space:nowrap; transition:background .15s,border-color .15s; }
+.da-btn:hover { background:#eef3fa; border-color:#b9c6db; }
+.da-btn-primary { background:#4a6fa5; color:#fff; border-color:#4a6fa5; }
+.da-btn-primary:hover { background:#3d5d8a; }
+.da-btn-secondary { background:#6c757d; color:#fff; border-color:#6c757d; }
+.da-btn-secondary:hover { background:#5a6268; }
+.da-select { padding:7px 12px; border-radius:8px; border:1px solid #d4d9e0; background:#fff; color:#2c3e50; font-size:0.88rem; }
+
+.da-kpi-row { display:grid; grid-template-columns:repeat(auto-fit,minmax(120px,1fr)); gap:12px; margin:6px 0 16px; }
+.da-kpi { background:#f0f4f8; border-radius:10px; padding:12px 14px; }
+.da-kpi-label { font-size:0.8rem; color:#6c7a89; margin-bottom:6px; }
+.da-kpi-val { font-size:1.6rem; font-weight:600; color:#2c3e50; line-height:1.1; }
+
+.da-row { display:flex; gap:14px; flex-wrap:wrap; align-items:flex-end; }
+.da-field { display:flex; flex-direction:column; gap:4px; min-width:120px; }
+.da-field label { font-size:0.8rem; color:#6c7a89; }
+.da-field-end { justify-content:flex-end; }
+.da-input { padding:7px 10px; border-radius:8px; border:1px solid #d4d9e0; background:#fff; color:#2c3e50; font-size:0.9rem; width:100%; box-sizing:border-box; }
+.da-hint { font-size:0.8rem; color:#8a96a3; margin:6px 0; }
+.da-empty { color:#8a96a3; text-align:center; padding:24px; }
+
+.da-table { width:100%; border-collapse:collapse; font-size:0.9rem; }
+.da-th { background:#f0f4f8; padding:9px 10px; border-bottom:2px solid #d4d9e0; text-align:left; font-weight:600; color:#2c3e50; white-space:nowrap; }
+.da-td { padding:8px 10px; border-bottom:1px solid #eef0f3; }
+.da-sortable { cursor:pointer; user-select:none; }
+.da-sortable:hover { background:#e3e9f2; }
+.da-link { background:none; border:none; color:#4a6fa5; cursor:pointer; font-size:0.88rem; padding:2px 6px; }
+.da-link:hover { text-decoration:underline; }
+.da-link-danger { color:#dc3545; }
+
+.da-chart-box { position:relative; height:340px; margin-top:6px; }
+
+.da-alert-list { display:flex; flex-direction:column; gap:8px; }
+.da-alert { padding:10px 14px; border-radius:8px; font-size:0.9rem; }
+
+/* 暗色适配 */
+body.dark .da-btn { background:#2a2f3f; color:#dfe6ee; border-color:#3a4150; }
+body.dark .da-btn:hover { background:#333a4a; }
+body.dark .da-btn-primary { background:#4a6fa5; border-color:#4a6fa5; color:#fff; }
+body.dark .da-select, body.dark .da-input { background:#2a2f3f; color:#dfe6ee; border-color:#3a4150; }
+body.dark .da-kpi { background:#2a2f3f; }
+body.dark .da-kpi-label { color:#9aa4b2; }
+body.dark .da-kpi-val { color:#e6edf3; }
+body.dark .da-th { background:#2a2f3f; color:#dfe6ee; border-bottom-color:#3a4150; }
+body.dark .da-td { border-bottom-color:#333a45; }
+body.dark .da-sortable:hover { background:#333a45; }
+body.dark .da-hint, body.dark .da-empty { color:#7e8a98; }
+

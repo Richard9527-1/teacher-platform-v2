@@ -472,3 +472,33 @@ window.exportClassExcel = exportClassExcel;
 window.parseClassWorkbook = parseClassWorkbook;
 window.parseClassJson = parseClassJson;
 window.CLASS_EXCEL_REQUIRED = CLASS_EXCEL_REQUIRED;
+
+// ========== 预警阈值设置 ==========
+const DA_ALERT_SETTINGS_KEY = 'daAlertSettings';
+function getDefaultAlertSettings() {
+  return {
+    scoreDrop: 10,       // 成绩下滑阈值（分）
+    progress: 10,        // 进步表扬阈值（分）
+    lowScoreOffset: 15,  // 低分：个人均分低于班级均分超过此值
+    biasOffset: 12,      // 偏科：某题型低于班级该题型均值超过此值
+    absentCount: 3,      // 累计/连续缺课预警天数
+    leaveDays: 7         // 长期请假天数
+  };
+}
+function loadAlertSettings() {
+  try {
+    const raw = localStorage.getItem(DA_ALERT_SETTINGS_KEY);
+    if (!raw) return getDefaultAlertSettings();
+    const parsed = JSON.parse(raw);
+    return Object.assign(getDefaultAlertSettings(), parsed);
+  } catch (e) {
+    return getDefaultAlertSettings();
+  }
+}
+function saveAlertSettings(s) {
+  try { localStorage.setItem(DA_ALERT_SETTINGS_KEY, JSON.stringify(s)); } catch (e) {}
+}
+
+window.loadAlertSettings = loadAlertSettings;
+window.saveAlertSettings = saveAlertSettings;
+window.getDefaultAlertSettings = getDefaultAlertSettings;
