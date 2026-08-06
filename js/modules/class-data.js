@@ -51,6 +51,7 @@ function loadClassData() {
   if (!data) {
     data = getDefaultClassData();
     localStorage.setItem(CLASS_DATA_KEY, JSON.stringify(data));
+    return data;
   }
   return JSON.parse(data);
 }

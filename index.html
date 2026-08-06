@@ -3,7 +3,7 @@
 <head>
   <meta charset="UTF-8">
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
-  <title>语文智备Pro</title>
+  <title>高中语文智备</title>
   <link rel="stylesheet" href="css/style.css">
   <!-- PWA：manifest（图标见 icons/icon.svg） -->
   <link rel="manifest" href="manifest.json">
@@ -14,7 +14,7 @@
   <!-- ===== 登录界面 ===== -->
 <div id="loginContainer" style="display:none;position:fixed;top:0;left:0;width:100%;height:100%;background:#4a6fa5;z-index:9999;justify-content:center;align-items:center;flex-direction:column;">
   <div style="background:#fff;padding:40px;border-radius:16px;box-shadow:0 10px 40px rgba(0,0,0,0.2);max-width:380px;width:90%;">
-    <h2 style="text-align:center;color:#2c3e50;margin-bottom:8px;">📚 语文智备Pro</h2>
+    <h2 style="text-align:center;color:#2c3e50;margin-bottom:8px;">📚 高中语文智备</h2>
     <p style="text-align:center;color:#7f8c8d;margin-bottom:24px;font-size:0.9rem;">请登录您的账号</p>
     <div id="loginError" style="color:#dc3545;text-align:center;margin-bottom:12px;display:none;"></div>
     <input type="text" id="loginUsername" placeholder="用户名" style="width:100%;padding:10px 14px;border-radius:8px;border:1px solid #ddd;margin-bottom:12px;font-size:1rem;box-sizing:border-box;" />
@@ -24,25 +24,25 @@
 </div>
 
   <div class="header">
-  <h1>📚 语文智备Pro</h1>
-  <div style="display:flex;align-items:center;gap:12px;flex:1;justify-content:center;padding:0 20px;">
-    <!-- 搜索框 -->
-    <div style="display:flex;align-items:center;background:rgba(255,255,255,0.2);border-radius:20px;padding:0 16px;height:34px;max-width:400px;width:100%;">
-      <input type="text" id="globalSearch" placeholder="搜索课文、作者、类型..." style="border:none;outline:none;background:transparent;color:#ffffff;font-size:0.9rem;padding:0 6px;height:34px;width:100%;font-weight:400;" />
-      <button id="searchBtn" style="background:transparent;border:none;color:rgba(255,255,255,0.7);cursor:pointer;font-size:0.9rem;padding:0 4px;height:34px;display:flex;align-items:center;">🔍</button>
-    </div>
-  </div>
+  <button class="menu-toggle" id="menuToggle" aria-label="打开菜单">☰</button>
+  <h1>📚 高中语文智备</h1>
   <div style="display:flex;align-items:center;gap:12px;">
+    <div class="search-box" id="globalSearchBox">
+      <input type="text" id="globalSearchInput" placeholder="搜索课文 · 作者 · 班级 · 学生 · 备课 · 待办" autocomplete="off" />
+      <button id="globalSearchBtn" title="搜索" aria-label="搜索">🔍</button>
+      <div class="search-dropdown" id="searchDropdown"></div>
+    </div>
     <span style="display:flex;align-items:center;gap:6px;color:rgba(255,255,255,0.9);font-size:0.85rem;">
       <i class="fas fa-user-circle" style="font-size:1.3rem;"></i>
     </span>
-    <span id="logoutBtn" style="cursor:pointer;font-size:0.8rem;color:rgba(255,255,255,0.8);padding:4px 12px;border-radius:12px;border:1px solid rgba(255,255,255,0.2);">🚪 退出</span>
     <button id="themeToggle" style="background:transparent;border:none;color:rgba(255,255,255,0.8);cursor:pointer;font-size:1.1rem;padding:0 4px;">🌙</button>
   </div>
 </div>
 
 
   
+  <div class="nav-backdrop" id="navBackdrop"></div>
+
   <div class="sidebar">
     <ul>
       <li class="active" data-module="dashboard">📊 工作台</li>
@@ -52,9 +52,8 @@
       <li data-module="resource">📁 教材资源</li>
       <li data-module="exam">📋 试卷中心</li>
       <li data-module="class">👥 班级管理</li>
-      <li data-module="data-analysis">📊 数据分析</span></li>
-      <li data-module="todo">⏰ 今日待办</span></li>
-      <li data-module="notification">🔔 系统通知</span></li>
+      <li data-module="data-analysis">📊 数据分析</li>
+      <li data-module="todo">⏰ 待办清单</li>
       <li data-module="settings">⚙️ 设置中心</li>
     </ul>
   </div>
@@ -69,6 +68,10 @@
      由 text-loader.js 在打开详情时按需懒加载，避免首屏卡顿 -->
 <script src="data/texts-index.js?v=20260803"></script>
 <script src="js/modules/text-loader.js?v=20260803"></script>
+<!-- Excel 导入导出（本地内置，离线可用；SheetJS 社区版） -->
+<script src="js/lib/xlsx.full.min.js"></script>
+<!-- 图表可视化（本地内置，离线可用；Chart.js v4 UMD） -->
+<script src="js/lib/chart.umd.js"></script>
 <script src="js/modules/class-data.js"></script>
 <script src="js/modules/dashboard.js"></script>
 <script src="js/modules/lesson-plan.js"></script> 
@@ -81,9 +84,9 @@
 <script src="js/modules/settings.js"></script>
 <script src="js/modules/schedule.js?v=20260707"></script>
 <script src="js/modules/todo.js"></script>
-<script src="js/modules/notification.js"></script>
 <script src="js/modules/scoreboard.js"></script>
 <script src="js/modules/ocr.js?v=20260731d"></script>
+<script src="js/modules/global-search.js?v=20260805"></script>
 <script src="js/app.js"></script>
   <!-- 可选：Service Worker -->
   <!-- <script>

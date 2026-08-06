@@ -1,6 +1,6 @@
 {
-  "name": "语文智备Pro",
-  "short_name": "语文智备",
+  "name": "高中语文智备",
+  "short_name": "高中语文智备",
   "description": "高中语文教师智能工作平台",
   "start_url": "index.html",
   "display": "standalone",

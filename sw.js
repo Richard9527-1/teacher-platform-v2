@@ -1,7 +1,7 @@
 // Service Worker
 // 注意：每次改动前端代码后，请把 CACHE_NAME 的版本号 +1，
 // 否则浏览器会一直用旧缓存，导致"代码改了但页面没变"。
-const CACHE_NAME = 'yuwen-v6';
+const CACHE_NAME = 'yuwen-v7';
 
 // 预缓存清单：仅放首屏必需资源。
 // 教材详情分片（data/texts/detail-*.js）不预缓存，

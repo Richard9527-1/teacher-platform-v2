@@ -130,6 +130,7 @@ input, select, textarea {
   border-radius: 30px;
   padding: 4px 8px;
   margin-right: 12px;
+  position: relative;
 }
 .search-box input {
   border: none;
@@ -138,7 +139,10 @@ input, select, textarea {
   color: #fff;
   padding: 4px 12px;
   font-size: 0.95rem;
-  width: 180px;
+  width: 220px;
+  height: 32px;
+  cursor: text;
+  text-align: left;
 }
 .search-box input::placeholder { color: rgba(255,255,255,0.7); }
 .search-box button {
@@ -149,6 +153,54 @@ input, select, textarea {
   font-size: 1rem;
   padding: 0 6px;
 }
+/* 搜索下拉结果 */
+.search-dropdown {
+  position: absolute;
+  top: calc(100% + 6px);
+  right: 0;
+  width: 360px;
+  max-width: 80vw;
+  max-height: 70vh;
+  overflow-y: auto;
+  background: #fff;
+  border: 1px solid #e0e0e0;
+  border-radius: 10px;
+  box-shadow: 0 8px 30px rgba(0,0,0,0.18);
+  z-index: 10000;
+  display: none;
+  color: #2c3e50;
+  text-align: left;
+}
+.search-group { border-bottom: 1px solid #f0f0f0; }
+.search-group:last-child { border-bottom: none; }
+.search-group-title {
+  padding: 6px 14px;
+  font-size: 0.72rem;
+  font-weight: 700;
+  color: #4a6fa5;
+  background: #f5f8fc;
+  letter-spacing: 1px;
+}
+.search-item {
+  padding: 8px 14px;
+  cursor: pointer;
+  border-bottom: 1px solid #f5f5f5;
+}
+.search-item:last-child { border-bottom: none; }
+.search-item:hover { background: #eef3fb; }
+.search-item-title { font-size: 0.92rem; font-weight: 600; color: #2c3e50; }
+.search-item-sub { font-size: 0.78rem; color: #7f8c8d; margin-top: 2px; }
+.search-dropdown mark { background: #fff3cd; color: #856404; padding: 0 2px; border-radius: 3px; }
+.search-empty { padding: 16px 14px; color: #7f8c8d; font-size: 0.85rem; text-align: center; }
+/* 暗色主题适配 */
+body.dark .search-dropdown { background: #2a2f3f; border-color: #3a4a5a; color: #e8ecf1; }
+body.dark .search-group { border-color: #3a4a5a; }
+body.dark .search-group-title { background: #1e242f; color: #8ab4f8; }
+body.dark .search-item { border-color: #3a4a5a; }
+body.dark .search-item:hover { background: #3a3f4f; }
+body.dark .search-item-title { color: #e8ecf1; }
+body.dark .search-item-sub { color: #a0aab8; }
+body.dark .search-dropdown mark { background: #4a3f1a; color: #ffd766; }
 /* 暗色主题适配 */
 body.dark .search-box {
   background: rgba(255,255,255,0.1);
@@ -195,15 +247,26 @@ body.dark .search-box input::placeholder { color: #a0aab8; }
 }
 .schedule-table .course-input {
   width: 100%;
-  border: 1px solid transparent;
-  background: transparent;
-  padding: 4px;
+  border: 1px solid #e3e6ea;
+  background: #fbfcfe;
+  padding: 5px 6px;
   text-align: center;
-  border-radius: 4px;
-  transition: border 0.2s;
+  font-size: 0.95rem;
+  font-weight: 600;
+  color: #1f2733;
+  border-radius: 6px;
+  transition: border 0.2s, background 0.2s;
+}
+.schedule-table .course-input:not(:placeholder-shown) {
+  background: #eef3fb;
+  border-color: #c9d6ea;
+}
+.schedule-table .course-input::placeholder {
+  color: #aab2bd;
+  font-weight: 400;
 }
 .schedule-table .course-input:hover {
-  border-color: #ccc;
+  border-color: #b9c4d4;
 }
 .schedule-table .course-input:focus {
   border-color: #4a6fa5;
@@ -260,9 +323,51 @@ body.dark .schedule-table .total-cell {
 .schedule-table .period-label {
   font-weight: 600;
 }
+/* 学科彩色徽章 + 有课单元格 + 今日课程学科标签 */
+.schedule-table .subject-select {
+  width: 100%;
+  padding: 4px 6px;
+  border-radius: 6px;
+  border: 1px solid #ddd;
+  background: var(--bg);
+  color: var(--text);
+  font-size: 0.85rem;
+  font-weight: 600;
+  cursor: pointer;
+  transition: box-shadow 0.2s, border 0.2s;
+}
+.schedule-table .subject-select:hover {
+  box-shadow: 0 0 0 2px rgba(74, 111, 165, 0.18);
+}
+.schedule-table td.lesson-cell.has-lesson {
+  background: #f1f6ff;
+}
+.schedule-table .today-subject {
+  white-space: nowrap;
+}
 /* 暗色主题适配 */
 body.dark .schedule-table .time-input:focus {
   background: #2a2f3f;
+}
+body.dark .schedule-table .subject-select {
+  background: #232b38;
+  color: #e6edf5;
+  border-color: #34405a;
+}
+body.dark .schedule-table td.lesson-cell.has-lesson {
+  background: #1f2a3a;
+}
+body.dark .schedule-table .course-input {
+  background: #232b38;
+  color: #e6edf5;
+  border-color: #34405a;
+}
+body.dark .schedule-table .course-input:not(:placeholder-shown) {
+  background: #2a3550;
+  border-color: #3a4a6a;
+}
+body.dark .schedule-table .course-input::placeholder {
+  color: #6b7688;
 }
 /* ===== 备课中心专用 ===== */
 .task-toolbar {
@@ -649,12 +754,6 @@ body.dark .stat-item {
   box-shadow: 0 2px 8px rgba(0,0,0,0.4);
 }
 
-/* ===== 搜索框占位文字颜色（提高对比度） ===== */
-#globalSearch::placeholder {
-  color: rgba(255, 255, 255, 0.8) !important;
-  font-weight: 300;
-}
-
 /* ===== Toast 动画 ===== */
 @keyframes fadeInUp {
   from {
@@ -692,3 +791,567 @@ body.dark .stat-item {
 @keyframes detailSpin {
   to { transform: rotate(360deg); }
 }
+
+/* ============================================================
+   试卷中心 / 高考题库暗色优化
+   ============================================================ */
+
+/* 浅色按钮（白底描边，用于试卷中心次级操作） */
+.btn-light {
+  background: #fff;
+  border: 1px solid #e0e0e0;
+  color: var(--text);
+}
+.btn-light:hover {
+  background: #f5f5f5;
+}
+
+/* 课文选择芯片 */
+.text-chip {
+  background: #fff;
+  border: 1px solid #e0e0e0;
+  color: var(--text);
+}
+.text-chip:hover {
+  background: #f5f8fc;
+  border-color: #c0d0e8;
+}
+.text-chip.selected {
+  background: var(--primary);
+  border-color: var(--primary);
+  color: #fff;
+}
+
+/* 试卷结构区 */
+.exam-panel {
+  background: #fafafa;
+  border: 1px solid #eee;
+}
+.paper-section-row {
+  background: #fff;
+  border: 1px solid #e8e8e8;
+}
+
+/* 默写模式提示条 */
+#clozeModeRow {
+  background: #fff;
+  border: 1px dashed #ddd;
+}
+
+/* 试卷中心滚动按钮 */
+.text-scroll-left,
+.text-scroll-right {
+  background: #fff;
+  border: 1px solid #ddd;
+}
+
+/* ============================================================
+   暗色主题全面适配（覆盖各模块硬编码浅色）
+   ============================================================ */
+
+/* 试卷中心 */
+body.dark .btn-light {
+  background: #2a2f3f;
+  border-color: #3a4a5a;
+  color: #e8ecf1;
+}
+body.dark .btn-light:hover {
+  background: #3a3f4f;
+}
+body.dark .text-chip {
+  background: #2a2f3f;
+  border-color: #3a4a5a;
+  color: #e8ecf1;
+}
+body.dark .text-chip:hover {
+  background: #3a3f4f;
+  border-color: #4a5a6a;
+}
+body.dark .text-chip.selected {
+  background: var(--primary);
+  border-color: var(--primary);
+  color: #1a1f2b;
+}
+body.dark .exam-panel {
+  background: #1e242f;
+  border-color: #3a4a5a;
+}
+body.dark .paper-section-row {
+  background: #2a2f3f;
+  border-color: #3a4a5a;
+}
+body.dark #clozeModeRow {
+  background: #2a2f3f;
+  border-color: #3a4a5a;
+}
+body.dark .text-scroll-left,
+body.dark .text-scroll-right {
+  background: #2a2f3f;
+  border-color: #3a4a5a;
+  color: #e8ecf1;
+}
+body.dark .text-scroll-left:hover,
+body.dark .text-scroll-right:hover {
+  background: #3a3f4f;
+}
+
+/* 通用警告/提示色块暗色柔化 */
+body.dark [style*="background:#fff3cd"],
+body.dark [style*="background: #fff3cd"] {
+  background: #4a3f1a !important;
+  color: #ffd766 !important;
+}
+body.dark [style*="background:#fff7e6"],
+body.dark [style*="background: #fff7e6"] {
+  background: #4a3f1a !important;
+  color: #ffd766 !important;
+}
+body.dark [style*="background:#d4edda"],
+body.dark [style*="background: #d4edda"] {
+  background: #1e3a2a !important;
+  color: #7ee0a0 !important;
+}
+body.dark [style*="background:#f8d7da"],
+body.dark [style*="background: #f8d7da"] {
+  background: #4a1f24 !important;
+  color: #ff9aa3 !important;
+}
+body.dark [style*="background:#cce5ff"],
+body.dark [style*="background: #cce5ff"] {
+  background: #1a3a5a !important;
+  color: #8ab4f8 !important;
+}
+
+/* 通用硬编码边框暗色化 */
+body.dark [style*="border:1px solid #eee"],
+body.dark [style*="border: 1px solid #eee"],
+body.dark [style*="border:1px solid #ddd"],
+body.dark [style*="border: 1px solid #ddd"],
+body.dark [style*="border:1px solid #e0e0e0"],
+body.dark [style*="border: 1px solid #e0e0e0"],
+body.dark [style*="border:1px solid #e8e8e8"],
+body.dark [style*="border: 1px solid #e8e8e8"] {
+  border-color: #3a4a5a !important;
+}
+
+/* 表格、输入框暗色边框 */
+body.dark table th,
+body.dark table td { border-color: #3a4a5a; }
+body.dark input,
+body.dark select,
+body.dark textarea { border-color: #3a4a5a; }
+
+/* 状态标签暗色适配 */
+body.dark .status.done { background: #1e3a2a; color: #7ee0a0; }
+body.dark .status.ongoing { background: #4a3f1a; color: #ffd766; }
+body.dark .status.pending { background: #4a1f24; color: #ff9aa3; }
+
+/* 备课任务卡片暗色 */
+body.dark .task-card.overdue { background: #4a1f24; border-left-color: #ff6b6b; }
+body.dark .task-card.due-soon { background: #4a3f1a; border-left-color: #ffd766; }
+body.dark .status-pending { background: #4a3f1a; color: #ffd766; }
+body.dark .status-doing { background: #1a3a5a; color: #8ab4f8; }
+body.dark .status-done { background: #1e3a2a; color: #7ee0a0; }
+body.dark .status-overdue { background: #4a1f24; color: #ff9aa3; }
+
+/* 课文资源详情页标签高亮 */
+body.dark .detail-tab.active { color: #8ab4f8; border-bottom-color: #8ab4f8; }
+
+/* 模态框操作区 */
+body.dark .modal-actions { border-top-color: #3a4a5a; }
+
+/* 修复暗色下部分 inline 文字色 */
+body.dark [style*="color:#555"],
+body.dark [style*="color: #555"] { color: #a0aab8 !important; }
+body.dark [style*="color:#333"],
+body.dark [style*="color: #333"] { color: #e8ecf1 !important; }
+
+/* ============================================================
+   全模块夜间模式统一修复（表头、徽章、进度条、提示条）
+   ============================================================ */
+
+/* 通用表头行 */
+.table-head-row {
+  background: #f0f4f8;
+}
+.table-head-row th,
+.table-head-row td {
+  border-bottom-color: #ddd;
+}
+body.dark .table-head-row {
+  background: #2a2f3f;
+}
+body.dark .table-head-row th,
+body.dark .table-head-row td {
+  color: #e8ecf1;
+  border-bottom-color: #3a4a5a;
+}
+
+/* 信息提示条（#e8f0fe） */
+body.dark [style*="background:#e8f0fe"],
+body.dark [style*="background: #e8f0fe"] {
+  background: #1a3a5a !important;
+  color: #8ab4f8 !important;
+}
+
+/* 成功/完善徽章（#e8f5e9） */
+body.dark [style*="background:#e8f5e9"],
+body.dark [style*="background: #e8f5e9"] {
+  background: #1e3a2a !important;
+  color: #7ee0a0 !important;
+}
+
+/* 灰度徽章（#f5f5f5） */
+body.dark [style*="background:#f5f5f5"],
+body.dark [style*="background: #f5f5f5"] {
+  background: #2a2f3f !important;
+  color: #a0aab8 !important;
+}
+
+/* 进度条背景（#e9ecef） */
+body.dark [style*="background:#e9ecef"],
+body.dark [style*="background: #e9ecef"] {
+  background: #2a2f3f !important;
+}
+
+/* 黄色按钮/标签（#ffc107） */
+body.dark [style*="background:#ffc107"],
+body.dark [style*="background: #ffc107"] {
+  background: #4a3f1a !important;
+  color: #ffd766 !important;
+}
+
+/* 试卷答案区（#f0f4f8） */
+body.dark [style*="background:#f0f4f8"],
+body.dark [style*="background: #f0f4f8"] {
+  background: #1e242f !important;
+}
+
+/* 更多硬编码边框（含 2px、虚线） */
+body.dark [style*="border-bottom:2px solid #ddd"],
+body.dark [style*="border-bottom: 2px solid #ddd"] {
+  border-bottom-color: #3a4a5a !important;
+}
+body.dark [style*="border:1px dashed #ddd"],
+body.dark [style*="border: 1px dashed #ddd"] {
+  border-color: #3a4a5a !important;
+}
+
+/* 硬编码文字色柔化 */
+body.dark [style*="color:#721c24"],
+body.dark [style*="color: #721c24"] { color: #ff9aa3 !important; }
+body.dark [style*="color:#856404"],
+body.dark [style*="color: #856404"] { color: #ffd766 !important; }
+body.dark [style*="color:#2e7d32"],
+body.dark [style*="color: #2e7d32"] { color: #7ee0a0 !important; }
+body.dark [style*="color:#9e9e9e"],
+body.dark [style*="color: #9e9e9e"] { color: #a0aab8 !important; }
+body.dark [style*="color:#2b5797"],
+body.dark [style*="color: #2b5797"] { color: #8ab4f8 !important; }
+body.dark [style*="color:#7f8c8d"],
+body.dark [style*="color: #7f8c8d"] { color: #a0aab8 !important; }
+body.dark [style*="color:#4a6fa5"],
+body.dark [style*="color: #4a6fa5"] { color: #8ab4f8 !important; }
+
+/* 课程表今日高亮 / 输入框聚焦 */
+body.dark .schedule-table th { background: #2a3f5a; }
+body.dark .schedule-table td { border-color: #3a4a5a; }
+body.dark .schedule-table .course-input:focus,
+body.dark .schedule-table .time-input:focus { background: #2a2f3f; }
+body.dark .schedule-table .total-cell { color: #8ab4f8; }
+
+/* 数据分析下拉、工具栏按钮 */
+body.dark .data-analysis-toolbar .btn,
+body.dark .task-toolbar .btn { border-color: #3a4a5a; }
+
+/* 资源卡片徽章 */
+body.dark .resource-badge { background: #2a2f3f; color: #a0aab8; }
+
+/* 修复 tab 按钮在暗色下的高亮 */
+body.dark .btn.active { background: var(--primary); color: #1a1f2b; }
+
+/* ============================================================
+   今日待办统计块
+   ============================================================ */
+.todo-summary {
+  display: flex;
+  gap: 16px;
+  margin-bottom: 16px;
+  flex-wrap: wrap;
+  align-items: stretch;
+}
+.todo-stat {
+  display: flex;
+  align-items: baseline;
+  gap: 6px;
+  background: var(--bg);
+  padding: 12px 20px;
+  border-radius: 8px;
+}
+.todo-stat-value {
+  font-size: 1.2rem;
+  font-weight: 700;
+  color: #4a6fa5;
+}
+.todo-stat-label {
+  color: var(--text-light);
+  font-size: 0.95rem;
+}
+.todo-stat-done {
+  background: #e8f5e9;
+}
+.todo-stat-done .todo-stat-value,
+.todo-stat-done .todo-stat-label {
+  color: #2e7d32;
+}
+.todo-stat-undone {
+  background: #ffebee;
+}
+.todo-stat-undone .todo-stat-value,
+.todo-stat-undone .todo-stat-label {
+  color: #c62828;
+}
+
+body.dark .todo-stat {
+  background: #2a2f3f;
+}
+body.dark .todo-stat-value,
+body.dark .todo-stat-label {
+  color: #e8ecf1;
+}
+body.dark .todo-stat-done {
+  background: #1e3a2a;
+}
+body.dark .todo-stat-done .todo-stat-value,
+body.dark .todo-stat-done .todo-stat-label {
+  color: #7ee0a0;
+}
+body.dark .todo-stat-undone {
+  background: #4a1f24;
+}
+body.dark .todo-stat-undone .todo-stat-value,
+body.dark .todo-stat-undone .todo-stat-label {
+  color: #ff9aa3;
+}
+
+/* 试卷答案区（exam.js 内嵌样式 .answer） */
+body.dark .answer {
+  background: #1e242f !important;
+  color: #8ab4f8 !important;
+}
+
+/* ===== 待办模块（重构版） ===== */
+.todo-tabs { display:flex; gap:8px; flex-wrap:wrap; margin-bottom:14px; }
+.todo-tab {
+  flex:1; min-width:72px; text-align:center; padding:10px 6px; border-radius:10px;
+  background:var(--bg); color:var(--text); cursor:pointer; font-size:0.9rem;
+  border:1px solid transparent; transition:all .15s; user-select:none;
+}
+.todo-tab:hover { background:var(--card-bg); }
+.todo-tab.active { background:#4a6fa5; color:#fff; border-color:#3a5a8a; font-weight:600; }
+.todo-tab-badge {
+  display:inline-block; min-width:20px; margin-left:4px; padding:0 6px;
+  font-size:0.75rem; border-radius:10px; background:rgba(0,0,0,0.08); color:inherit;
+}
+.todo-tab.active .todo-tab-badge { background:rgba(255,255,255,0.25); }
+
+.todo-toolbar { display:flex; flex-direction:column; gap:8px; margin-bottom:12px; }
+.todo-actions { display:flex; gap:6px; flex-wrap:wrap; justify-content:flex-end; }
+
+.todo-overdue-banner {
+  background:#fff3cd; color:#856404; border:1px solid #ffe69c; border-radius:8px;
+  padding:8px 12px; font-size:0.85rem; margin-bottom:10px;
+}
+.todo-group-title { font-size:0.82rem; color:var(--text-light); margin:10px 0 6px; font-weight:600; }
+
+.todo-items { display:flex; flex-direction:column; gap:8px; }
+.todo-item {
+  display:flex; align-items:center; gap:10px; background:var(--card-bg);
+  padding:10px 14px; border-radius:8px; box-shadow:0 1px 4px rgba(0,0,0,0.06);
+  border-left:4px solid transparent;
+}
+.todo-item.done { opacity:0.6; }
+.todo-item.done .todo-item-text { text-decoration:line-through; color:var(--text-light); }
+.todo-priority-bar { width:4px; align-self:stretch; border-radius:3px; }
+.todo-item-body { flex:1; min-width:0; }
+.todo-item-text { font-weight:500; word-break:break-all; cursor:pointer; }
+.todo-item-meta { font-size:0.78rem; color:var(--text-light); margin-top:2px; display:flex; flex-wrap:wrap; gap:4px; align-items:center; }
+.btn-mini {
+  background:#fff3cd; color:#856404; border:1px solid #ffe69c; border-radius:6px;
+  padding:3px 8px; font-size:0.75rem; cursor:pointer; white-space:nowrap;
+}
+.btn-mini:hover { background:#ffe9a8; }
+.todo-stats-foot { margin-top:12px; padding-top:10px; border-top:1px dashed #e0e0e0; }
+
+/* 暗色模式适配 */
+body.dark .todo-tab { background:#1e242f; }
+body.dark .todo-tab:hover { background:#2a2f3f; }
+body.dark .todo-item { background:#2a2f3f; }
+body.dark .todo-overdue-banner { background:#3a2f1f; color:#ffd591; border-color:#5a4a2f; }
+body.dark .btn-mini { background:#3a2f1f; color:#ffd591; border-color:#5a4a2f; }
+body.dark .todo-stats-foot { border-top-color:#3a3f4f; }
+
+/* ===== 设置中心排版优化（轻量调样式） ===== */
+.settings-header {
+  display:flex; align-items:center; gap:14px;
+  padding:2px 2px 16px; margin-bottom:18px;
+  border-bottom:1px solid rgba(0,0,0,0.07);
+}
+.settings-logo {
+  width:46px; height:46px; flex:0 0 46px;
+  display:flex; align-items:center; justify-content:center;
+  font-size:1.5rem; border-radius:12px;
+  background:var(--primary); color:#fff;
+  box-shadow:0 2px 10px rgba(74,111,165,0.28);
+}
+.settings-title-wrap { flex:1; min-width:0; }
+.settings-title {
+  font-size:1.35rem; font-weight:700; color:var(--text);
+  margin:0; line-height:1.2;
+}
+.settings-subtitle {
+  font-size:0.85rem; color:var(--text-light); margin:3px 0 0;
+}
+.settings-version {
+  font-size:0.76rem; color:var(--text-light);
+  background:var(--bg); border:1px solid rgba(0,0,0,0.08);
+  padding:4px 12px; border-radius:20px; white-space:nowrap;
+}
+
+/* 左侧分组导航 */
+#settingsNav { display:flex; flex-direction:column; gap:4px; }
+.settings-nav-btn {
+  width:100%; text-align:left;
+  display:flex; align-items:center; gap:8px;
+  padding:9px 12px; border-radius:8px;
+  background:transparent; color:var(--text);
+  border:1px solid transparent; border-left:3px solid transparent;
+  cursor:pointer; font-size:0.92rem;
+  transition:background 0.18s, border-color 0.18s, color 0.18s;
+}
+.settings-nav-btn:hover { background:var(--bg); }
+.settings-nav-btn.active {
+  background:rgba(74,111,165,0.12);
+  border-left-color:var(--primary);
+  color:var(--primary); font-weight:600;
+}
+.settings-nav-icon { font-size:1rem; line-height:1; }
+.settings-nav-label { flex:1; }
+
+/* 子项（操作日志）缩进 + 左侧竖线连接 */
+.settings-nav-sub {
+  margin-left:14px; padding-left:14px;
+  width:calc(100% - 14px);
+  border-left:2px solid rgba(0,0,0,0.10);
+  border-radius:0 8px 8px 0;
+  font-size:0.82rem; color:var(--text-light);
+}
+.settings-nav-sub.active {
+  color:var(--primary);
+  border-left-color:var(--primary);
+  background:rgba(74,111,165,0.12);
+}
+
+/* 设置中心搜索框轻量化 */
+#settingsSearch {
+  border:1px solid rgba(0,0,0,0.12);
+  background:var(--bg); color:var(--text);
+}
+
+/* 暗色模式适配 */
+body.dark .settings-header { border-bottom-color:rgba(255,255,255,0.08); }
+body.dark .settings-nav-btn:hover { background:rgba(255,255,255,0.06); }
+body.dark .settings-nav-sub { border-left-color:rgba(255,255,255,0.14); }
+
+/* ============================================================
+   移动端适配（≤768px）：侧边栏改为可滑出抽屉，内容全宽
+   ============================================================ */
+.menu-toggle {
+  display: none;                 /* 桌面端默认隐藏 */
+  background: transparent;
+  border: 1px solid rgba(255,255,255,0.65);
+  color: #fff;
+  font-size: 1.5rem;
+  line-height: 1;
+  padding: 4px 10px;
+  border-radius: 8px;
+  cursor: pointer;
+}
+.nav-backdrop {
+  display: none;
+  position: fixed;
+  inset: 0;
+  background: rgba(0,0,0,0.35);
+  z-index: 999;
+}
+body.nav-open .nav-backdrop { display: block; }
+
+@media (max-width: 768px) {
+  body { overflow-x: hidden; }   /* 防止抽屉离屏时产生横向滚动条 */
+
+  .menu-toggle { display: inline-block; }
+
+  .header {
+    flex-wrap: wrap;
+    padding: 10px 14px;
+    gap: 8px;
+  }
+  .header h1 { font-size: 1.15rem; flex: 1; min-width: 0; }
+  /* 控制区（搜索 + 用户 + 主题）整体换行占满一行 */
+  .header > div {
+    order: 3;
+    width: 100%;
+    display: flex;
+    flex-wrap: wrap;
+    align-items: center;
+    gap: 8px;
+  }
+  .search-box { flex: 1 1 100%; width: 100%; margin-right: 0; }
+  .search-box input { width: 100%; flex: 1; }
+  .header > div > span { margin-left: auto; }
+
+  /* 侧边栏：固定抽屉，默认隐藏在屏幕左侧 */
+  .sidebar {
+    position: fixed;
+    top: 0;
+    left: 0;
+    bottom: 0;
+    width: 240px;
+    height: 100vh;
+    float: none;
+    transform: translateX(-100%);
+    transition: transform 0.25s ease;
+    z-index: 1000;
+    padding-top: 16px;
+    box-shadow: 2px 0 16px rgba(0,0,0,0.25);
+  }
+  body.nav-open .sidebar { transform: translateX(0); }
+
+  .main {
+    margin-left: 0;
+    padding: 16px 12px;
+  }
+
+  /* 栅格降列 */
+  .quick-grid { grid-template-columns: repeat(3, 1fr); gap: 10px; }
+  .stat-grid { grid-template-columns: repeat(2, 1fr); }
+
+  /* 表格横向滚动，避免窄屏溢出挤压 */
+  .main table { display: block; overflow-x: auto; white-space: nowrap; }
+  .main table th, .main table td { white-space: nowrap; }
+
+  /* 表单横向排列改为纵向堆叠 */
+  .row { flex-direction: column; gap: 0; }
+  .modal-box .form-row { flex-direction: column; gap: 0; }
+
+  /* 卡片与弹窗内边距收紧 */
+  .card { padding: 16px 14px; }
+  .modal-box { padding: 20px 18px; }
+
+  /* 各类工具条换行，避免按钮被挤出 */
+  .toolbar, .task-toolbar, .exam-toolbar, .resource-toolbar,
+  .class-toolbar, .data-toolbar, .schedule-toolbar, .todo-toolbar {
+    flex-wrap: wrap;
+  }
+}
+
