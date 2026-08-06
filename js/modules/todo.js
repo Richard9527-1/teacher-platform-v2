@@ -249,7 +249,7 @@ function renderTodo() {
     <div id="todoList" class="todo-items"></div>
     <div class="todo-stats-foot">
       <div style="font-size:0.85rem;color:var(--text-light);margin-bottom:6px;">📈 近 7 日完成趋势</div>
-      <canvas id="todoTrend" height="120" style="width:100%;"></canvas>
+      <canvas id="todoTrend" height="80" style="width:100%;"></canvas>
     </div>
   </div>`;
 }
