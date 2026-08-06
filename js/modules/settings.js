@@ -103,19 +103,26 @@ function renderSettings() {
   const settings = loadSettings();
   return `
     <div class="card">
-      <div class="panel-head"><h2 class="panel-title">⚙️ 设置中心</h2></div>
-      <div class="settings-tabs">
-        <button class="btn btn-secondary active" data-tab="data">📦 数据管理</button>
-        <button class="btn btn-secondary" data-tab="teaching">📚 教学配置</button>
-        <button class="btn btn-secondary" data-tab="lesson">📝 备课偏好</button>
-        <button class="btn btn-secondary" data-tab="score">📊 成绩分析</button>
-        <button class="btn btn-secondary" data-tab="ui">🎨 界面偏好</button>
-        <button class="btn btn-secondary" data-tab="system">🖥️ 系统</button>
-        <button class="btn btn-secondary" data-tab="log">📋 操作日志</button>
-        <button class="btn btn-secondary" data-tab="help">❓ 帮助</button>
+      <div class="panel-head">
+        <div>
+          <h2 class="panel-title">⚙️ 设置中心</h2>
+          <div class="panel-sub">数据备份、教学配置与界面偏好</div>
+        </div>
       </div>
-      <div id="settingsContent">
-        ${renderDataTab(settings)}
+      <div class="settings-layout">
+        <nav id="settingsNav">
+          <button class="settings-nav-btn active" data-tab="data">📦 数据管理</button>
+          <button class="settings-nav-btn" data-tab="teaching">📚 教学配置</button>
+          <button class="settings-nav-btn" data-tab="lesson">📝 备课偏好</button>
+          <button class="settings-nav-btn" data-tab="score">📊 成绩分析</button>
+          <button class="settings-nav-btn" data-tab="ui">🎨 界面偏好</button>
+          <button class="settings-nav-btn" data-tab="system">🖥️ 系统</button>
+          <button class="settings-nav-btn" data-tab="log">📋 操作日志</button>
+          <button class="settings-nav-btn" data-tab="help">❓ 帮助</button>
+        </nav>
+        <div id="settingsContent" class="settings-content">
+          ${renderDataTab(settings)}
+        </div>
       </div>
     </div>
   `;
@@ -126,12 +133,12 @@ function renderDataTab(settings) {
   const backupList = JSON.parse(localStorage.getItem(BACKUP_KEY) || '[]');
   return `
     <h3>📦 数据管理</h3>
-    <div style="display:grid;grid-template-columns:1fr 1fr;gap:16px;">
+    <div class="settings-grid">
 
       <!-- 分类备份 -->
-      <div style="background:var(--bg);padding:12px;border-radius:var(--radius-md);">
+      <div class="settings-card">
         <h4>💾 分类备份</h4>
-        <div class="btn-group" style="margin:8px 0;">
+        <div class="btn-group">
           <button class="btn btn-sm" onclick="backupCategory('lessonTasks')">备课</button>
           <button class="btn btn-sm" onclick="backupCategory('classData')">班级</button>
           <button class="btn btn-sm" onclick="backupCategory('examData')">试卷</button>
@@ -139,23 +146,23 @@ function renderDataTab(settings) {
           <button class="btn btn-sm" onclick="backupCategory('scheduleData')">课程表</button>
           <button class="btn btn-sm btn-success" onclick="backupAll()">📦 全部</button>
         </div>
-        <div style="font-size:0.8rem;color:var(--text-light);">备份文件: ${backupList.length} 个</div>
+        <div class="hint">备份文件：${backupList.length} 个</div>
       </div>
 
       <!-- 分类恢复 -->
-      <div style="background:var(--bg);padding:12px;border-radius:var(--radius-md);">
+      <div class="settings-card">
         <h4>📂 恢复数据</h4>
-        <div class="btn-group" style="margin:8px 0;">
+        <div class="btn-group">
           <button class="btn btn-sm" onclick="restoreCategory()">从文件恢复</button>
-          <button class="btn btn-sm btn-info" onclick="showBackupList()">📋 查看备份</button>
+          <button class="btn btn-sm" onclick="showBackupList()">📋 查看备份</button>
         </div>
-        <div style="font-size:0.8rem;color:var(--text-light);">选择备份文件恢复对应数据</div>
+        <div class="hint">选择备份文件恢复对应数据</div>
       </div>
 
       <!-- 导出格式 -->
-      <div style="background:var(--bg);padding:12px;border-radius:var(--radius-md);">
+      <div class="settings-card">
         <h4>📤 导出格式</h4>
-        <select id="exportFormat" class="da-select" onchange="updateSetting('exportFormat',this.value)">
+        <select id="exportFormat" onchange="updateSetting('exportFormat',this.value)">
           <option value="json" ${settings.exportFormat==='json'?'selected':''}>JSON</option>
           <option value="excel" ${settings.exportFormat==='excel'?'selected':''}>Excel (.xlsx)</option>
         </select>
@@ -165,9 +172,9 @@ function renderDataTab(settings) {
       </div>
 
       <!-- 选择性清除 -->
-      <div style="background:var(--bg);padding:12px;border-radius:var(--radius-md);">
+      <div class="settings-card">
         <h4>🗑️ 选择性清除</h4>
-        <div class="btn-group" style="margin:8px 0;">
+        <div class="btn-group">
           <button class="btn btn-sm btn-danger" onclick="clearCategory('lessonTasks')">备课</button>
           <button class="btn btn-sm btn-danger" onclick="clearCategory('classData')">班级</button>
           <button class="btn btn-sm btn-danger" onclick="clearCategory('examData')">试卷</button>
@@ -177,16 +184,16 @@ function renderDataTab(settings) {
       </div>
 
       <!-- 自动备份 -->
-      <div style="background:var(--bg);padding:12px;border-radius:var(--radius-md);grid-column:span 2;">
+      <div class="settings-card span-2">
         <h4>🔄 自动备份</h4>
-        <div style="display:flex;align-items:center;gap:12px;flex-wrap:wrap;">
+        <div class="inline-form wrap">
           <label>
             <input type="checkbox" ${settings.autoBackup?'checked':''} onchange="updateSetting('autoBackup',this.checked)" />
             启用自动备份
           </label>
           <label>
-            周期:
-            <select class="da-select" onchange="updateSetting('backupInterval',parseInt(this.value))">
+            周期：
+            <select onchange="updateSetting('backupInterval',parseInt(this.value))">
               <option value="1" ${settings.backupInterval===1?'selected':''}>每天</option>
               <option value="3" ${settings.backupInterval===3?'selected':''}>3天</option>
               <option value="7" ${settings.backupInterval===7?'selected':''}>7天</option>
@@ -194,7 +201,7 @@ function renderDataTab(settings) {
               <option value="30" ${settings.backupInterval===30?'selected':''}>30天</option>
             </select>
           </label>
-          <span style="font-size:0.85rem;color:var(--text-light);">下次备份: ${getNextBackupTime(settings.backupInterval)}</span>
+          <span class="hint" style="margin:0;">下次备份：${getNextBackupTime(settings.backupInterval)}</span>
         </div>
       </div>
     </div>
@@ -239,44 +246,44 @@ function renderTeachingTab(settings) {
 function renderLessonTab(settings) {
   return `
     <h3>📝 备课 & 教材偏好</h3>
-    <div style="display:grid;grid-template-columns:1fr 1fr;gap:16px;">
+    <div class="settings-grid">
 
       <!-- 默认备课模板 -->
-      <div style="background:var(--bg);padding:12px;border-radius:var(--radius-md);grid-column:span 2;">
+      <div class="settings-card span-2">
         <h4>📋 默认备课模板</h4>
         <div style="display:grid;grid-template-columns:1fr 1fr 1fr;gap:8px;">
           <div>
-            <label style="font-size:0.85rem;">教学目标</label>
-            <textarea id="tmplObjectives" rows="2" style="width:100%;padding:4px 8px;border-radius:6px;border:1px solid #ddd;background:var(--bg);color:var(--text);font-size:0.85rem;" onchange="updateTemplate('objectives',this.value)">${settings.defaultLessonTemplate.objectives||''}</textarea>
+            <label class="field-label">教学目标</label>
+            <textarea id="tmplObjectives" rows="2" onchange="updateTemplate('objectives',this.value)">${settings.defaultLessonTemplate.objectives||''}</textarea>
           </div>
           <div>
-            <label style="font-size:0.85rem;">教学重难点</label>
-            <textarea id="tmplKeyPoints" rows="2" style="width:100%;padding:4px 8px;border-radius:6px;border:1px solid #ddd;background:var(--bg);color:var(--text);font-size:0.85rem;" onchange="updateTemplate('keyPoints',this.value)">${settings.defaultLessonTemplate.keyPoints||''}</textarea>
+            <label class="field-label">教学重难点</label>
+            <textarea id="tmplKeyPoints" rows="2" onchange="updateTemplate('keyPoints',this.value)">${settings.defaultLessonTemplate.keyPoints||''}</textarea>
           </div>
           <div>
-            <label style="font-size:0.85rem;">教学过程/作业</label>
-            <textarea id="tmplProcess" rows="2" style="width:100%;padding:4px 8px;border-radius:6px;border:1px solid #ddd;background:var(--bg);color:var(--text);font-size:0.85rem;" onchange="updateTemplate('process',this.value)">${settings.defaultLessonTemplate.process||''}</textarea>
+            <label class="field-label">教学过程/作业</label>
+            <textarea id="tmplProcess" rows="2" onchange="updateTemplate('process',this.value)">${settings.defaultLessonTemplate.process||''}</textarea>
           </div>
         </div>
       </div>
 
       <!-- 教材展示设置 -->
-      <div style="background:var(--bg);padding:12px;border-radius:var(--radius-md);">
+      <div class="settings-card">
         <h4>📖 教材展示设置</h4>
-        <div style="display:flex;flex-direction:column;gap:6px;margin-top:8px;">
+        <div class="settings-checklist">
           <label><input type="checkbox" ${settings.showTranslation?'checked':''} onchange="updateSetting('showTranslation',this.checked)" /> 默认显示译文</label>
           <label><input type="checkbox" ${settings.showNotes?'checked':''} onchange="updateSetting('showNotes',this.checked)" /> 默认显示注释</label>
           <label><input type="checkbox" ${settings.showExamPoints?'checked':''} onchange="updateSetting('showExamPoints',this.checked)" /> 默认显示考点</label>
         </div>
       </div>
 
-      <!-- 素材存储路径 -->
-      <div style="background:var(--bg);padding:12px;border-radius:var(--radius-md);">
+      <!-- 素材存储 -->
+      <div class="settings-card">
         <h4>📁 素材存储</h4>
-        <div style="font-size:0.85rem;color:var(--text-light);margin-top:8px;">
-          <p>当前存储: localStorage（本地）</p>
-          <p>已用空间: ${getStorageUsage()}</p>
-          <p style="font-size:0.75rem;color:var(--text-light);">所有素材附件均存储在浏览器本地，建议定期备份。</p>
+        <div class="hint" style="margin-top:0;">
+          <p>当前存储：localStorage（本地）</p>
+          <p>已用空间：${getStorageUsage()}</p>
+          <p style="font-size:0.78rem;">所有素材附件均存储在浏览器本地，建议定期备份。</p>
         </div>
       </div>
     </div>
@@ -287,30 +294,30 @@ function renderLessonTab(settings) {
 function renderScoreTab(settings) {
   return `
     <h3>📊 成绩 & 考勤数据分析配置</h3>
-    <div style="display:grid;grid-template-columns:1fr 1fr;gap:16px;">
+    <div class="settings-grid">
 
       <!-- 分数区间 -->
-      <div style="background:var(--bg);padding:12px;border-radius:var(--radius-md);">
+      <div class="settings-card">
         <h4>📊 分数区间自定义</h4>
-        <div style="display:grid;grid-template-columns:1fr 1fr;gap:6px;margin-top:8px;">
-          <label>优秀 ≥ <input type="number" value="${settings.scoreRanges.excellent||90}" onchange="updateScoreRange('excellent',parseInt(this.value))" style="width:60px;padding:2px 4px;border-radius:4px;border:1px solid #ddd;background:var(--bg);color:var(--text);" /></label>
-          <label>良好 ≥ <input type="number" value="${settings.scoreRanges.good||80}" onchange="updateScoreRange('good',parseInt(this.value))" style="width:60px;padding:2px 4px;border-radius:4px;border:1px solid #ddd;background:var(--bg);color:var(--text);" /></label>
-          <label>及格 ≥ <input type="number" value="${settings.scoreRanges.pass||60}" onchange="updateScoreRange('pass',parseInt(this.value))" style="width:60px;padding:2px 4px;border-radius:4px;border:1px solid #ddd;background:var(--bg);color:var(--text);" /></label>
+        <div class="inline-form wrap" style="margin-top:8px;">
+          <label>优秀 ≥ <input type="number" value="${settings.scoreRanges.excellent||90}" onchange="updateScoreRange('excellent',parseInt(this.value))" /></label>
+          <label>良好 ≥ <input type="number" value="${settings.scoreRanges.good||80}" onchange="updateScoreRange('good',parseInt(this.value))" /></label>
+          <label>及格 ≥ <input type="number" value="${settings.scoreRanges.pass||60}" onchange="updateScoreRange('pass',parseInt(this.value))" /></label>
         </div>
       </div>
 
       <!-- 预警阈值 -->
-      <div style="background:var(--bg);padding:12px;border-radius:var(--radius-md);">
+      <div class="settings-card">
         <h4>⚠️ 预警阈值设置</h4>
-        <div style="display:grid;grid-template-columns:1fr 1fr;gap:6px;margin-top:8px;">
-          <label>成绩下滑 ≥ <input type="number" value="${settings.alertThresholds.scoreDrop||10}" onchange="updateAlertThreshold('scoreDrop',parseInt(this.value))" style="width:60px;padding:2px 4px;border-radius:4px;border:1px solid #ddd;background:var(--bg);color:var(--text);" /> 分</label>
-          <label>缺勤 ≥ <input type="number" value="${settings.alertThresholds.absenceCount||3}" onchange="updateAlertThreshold('absenceCount',parseInt(this.value))" style="width:60px;padding:2px 4px;border-radius:4px;border:1px solid #ddd;background:var(--bg);color:var(--text);" /> 次</label>
+        <div class="inline-form wrap" style="margin-top:8px;">
+          <label>成绩下滑 ≥ <input type="number" value="${settings.alertThresholds.scoreDrop||10}" onchange="updateAlertThreshold('scoreDrop',parseInt(this.value))" /> 分</label>
+          <label>缺勤 ≥ <input type="number" value="${settings.alertThresholds.absenceCount||3}" onchange="updateAlertThreshold('absenceCount',parseInt(this.value))" /> 次</label>
         </div>
-        <div style="margin-top:6px;font-size:0.85rem;color:var(--text-light);">超过阈值自动触发预警提醒</div>
+        <div class="hint">超过阈值自动触发预警提醒</div>
       </div>
 
-      <!-- 报表样式已移除（无对应导出逻辑消费，属死字段） -->
-      <div style="background:var(--bg);padding:12px;border-radius:var(--radius-md);grid-column:span 2;">
+      <!-- 报表导出 -->
+      <div class="settings-card span-2">
         <h4>📄 报表导出</h4>
         <p class="hint">成绩与试卷报表将沿用系统默认排版导出；如需自定义报表样式，可在对应模块提出。</p>
       </div>
@@ -429,20 +436,19 @@ function renderLogTab(settings) {
   const logs = JSON.parse(localStorage.getItem(LOG_KEY) || '[]');
   return `
     <h3>📋 完整操作日志</h3>
-    <div style="background:var(--bg);padding:12px;border-radius:var(--radius-md);max-height:500px;overflow-y:auto;">
-      ${logs.length===0?'<div style="color:var(--text-light);padding:20px;text-align:center;">暂无操作记录</div>':
-        logs.map(log =>
-          `<div style="padding:6px 12px;border-bottom:1px solid #eee;display:flex;justify-content:space-between;align-items:center;">
-            <div>
-              <span style="font-weight:500;">${log.action}</span>
-              ${log.detail ? `<span style="color:var(--text-light);font-size:0.9rem;">${log.detail}</span>` : ''}
-            </div>
-            <span style="color:var(--text-light);font-size:0.75rem;">${new Date(log.time).toLocaleString()}</span>
-          </div>`
-        ).join('')
-      }
+    <div class="settings-card">
+      <div class="log-list" style="max-height:520px;">
+        ${logs.length===0?'<div class="hint">暂无操作记录</div>':
+          logs.map(log =>
+            `<div class="log-item">
+              <span>${log.action} ${log.detail||''}</span>
+              <span class="log-time">${new Date(log.time).toLocaleString()}</span>
+            </div>`
+          ).join('')
+        }
+      </div>
     </div>
-    <div style="margin-top:8px;display:flex;gap:8px;">
+    <div class="btn-group" style="margin-top:12px;">
       <button class="btn btn-danger" onclick="clearLogs()">清空所有日志</button>
       <button class="btn btn-success" onclick="exportLogs()">导出日志</button>
     </div>

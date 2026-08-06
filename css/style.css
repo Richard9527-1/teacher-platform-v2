@@ -1350,8 +1350,10 @@ body.dark .todo-stats-foot { border-top-color:#3a3f4f; }
   padding:4px 12px; border-radius:20px; white-space:nowrap;
 }
 
-/* 左侧分组导航 */
-#settingsNav { display:flex; flex-direction:column; gap:4px; }
+/* 设置中心：左侧垂直导航 + 整体两栏布局 */
+.settings-layout { display:flex; gap:20px; align-items:flex-start; }
+.settings-content { flex:1; min-width:0; }
+#settingsNav { display:flex; flex-direction:column; gap:4px; flex:0 0 184px; }
 .settings-nav-btn {
   width:100%; text-align:left;
   display:flex; align-items:center; gap:8px;
@@ -1433,6 +1435,9 @@ body.dark .todo-stats-foot { border-top-color:#3a3f4f; }
   padding: 6px 8px; border-radius: 6px; border: 1px solid rgba(0,0,0,0.15);
   background: var(--bg); color: var(--text); font-size: 0.86rem; max-width: 100%;
 }
+.settings-card input[type="number"] { width: 84px; padding: 5px 8px; border-radius: 6px; border: 1px solid rgba(0,0,0,0.15); background: var(--bg); color: var(--text); font-size: 0.86rem; }
+.settings-checklist { display: flex; flex-direction: column; gap: 6px; margin-top: 8px; }
+.field-label { display: block; font-size: 0.82rem; color: var(--text-light); margin-bottom: 4px; }
 /* 暗色适配 */
 body.dark .settings-card { border-color: #3a4a5a; }
 body.dark .settings-card h4 { color: #e8ecf1; }
@@ -1560,6 +1565,17 @@ body.nav-open .nav-backdrop { display: block; }
   .toolbar, .task-toolbar, .exam-toolbar, .resource-toolbar,
   .class-toolbar, .data-toolbar, .schedule-toolbar, .todo-toolbar {
     flex-wrap: wrap;
+  }
+
+  /* 设置中心：左侧导航在窄屏转为横向换行，避免挤压内容 */
+  .settings-layout { flex-direction: column; gap: 12px; }
+  #settingsNav { flex: 1 1 auto; flex-direction: row; flex-wrap: wrap; }
+  .settings-nav-btn {
+    flex: 1 1 auto; justify-content: center;
+    border-left: none; border-bottom: 3px solid transparent;
+  }
+  .settings-nav-btn.active {
+    border-left-color: transparent; border-bottom-color: var(--primary);
   }
 }
 
