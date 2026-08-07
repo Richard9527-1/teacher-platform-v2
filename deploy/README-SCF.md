@@ -1,6 +1,8 @@
 # 腾讯云 SCF 部署 OCR 后端（国内稳定访问）
 
-如果你发现 Vercel 在国内访问超时/必须挂梯子，可以把 OCR 后端部署到 **腾讯云云函数 SCF + API 网关**，国内访问又快又稳。
+如果你发现 Vercel 在国内访问超时/必须挂梯子，可以把 OCR 后端部署到 **腾讯云云函数 SCF + 函数 URL**，国内访问又快又稳。
+
+> **注意**：腾讯云 API 网关触发器已于 2024 年 7 月 1 日起停止新建。本方案改用 **SCF 函数 URL** 作为公网访问入口，事件格式与 API 网关相同，无需修改 `ocr-scf.js`。
 
 ## 前置条件
 
@@ -12,7 +14,7 @@
 
 ### 1. 打包
 
-在仓库根目录执行：
+在项目根目录执行：
 
 ```bash
 node deploy/scf-package.js
@@ -50,30 +52,32 @@ node deploy/scf-package.js
 | `TENCENT_SECRET_KEY` | 腾讯云 API SecretKey |
 | `TENCENT_OCR_REGION` | OCR 服务地域，可选，默认 `ap-guangzhou` |
 
-### 4. 创建 API 网关触发器
+### 4. 开启函数 URL
 
-1. 进入函数 → **触发管理** → **创建触发器**
-2. 触发方式选择 **API 网关**
-3. 新建 API 服务：
-   - **API 名称**：`ocr`
-   - **请求方法**：`ANY` 或只选 `POST`
-   - **鉴权类型**：选 **免鉴权**（因为前端是公开调用）
-4. 点 **提交**
-
-提交后，触发器列表会显示一个 **访问路径**，类似：
+1. 进入函数 → **函数管理 → 函数配置**
+2. 找到 **函数 URL**（或 **访问路径**）→ 点 **开启**
+3. 配置：
+   - **鉴权方式**：选 **无鉴权**（前端是公开调用）
+   - **CORS 配置**：开启并设置：
+     - **允许的 Origin**：`*`
+     - **允许的 Method**：`POST, OPTIONS`
+     - **允许的 Header**：`Content-Type`
+4. 保存后，控制台会显示一个 **函数 URL**，类似：
 
 ```
-https://service-xxx-123456789.gz.apigw.tencentcs.com/release/ocr
+https://example-xxx.gz.url.cn/release/teacher-platform-ocr
 ```
 
 把这个地址复制下来。
+
+> 函数 URL 本质上复用了 API 网关 v2.0 事件格式，因此 `ocr-scf.js` 无需任何改动。
 
 ### 5. 前端配置
 
 打开教师平台 → 作文批改 → 📷 手写录入 → ⚙️ 识别接口地址 → 填：
 
 ```
-https://service-xxx-123456789.gz.apigw.tencentcs.com/release/ocr
+https://example-xxx.gz.url.cn/release/teacher-platform-ocr
 ```
 
 点保存，然后上传手写图测试。
@@ -82,27 +86,23 @@ https://service-xxx-123456789.gz.apigw.tencentcs.com/release/ocr
 
 如果浏览器提示 `CORS error`：
 
-1. 进入 [API 网关控制台](https://console.cloud.tencent.com/apigateway)
-2. 找到你的 API 服务 → 编辑 `ocr` API
-3. 开启 **CORS 跨域资源共享**：
-   - **允许的 Origin**：`*`
-   - **允许的 Method**：`POST, OPTIONS`
-   - **允许的 Header**：`Content-Type`
-4. 发布/重新部署 API
+1. 确认函数代码已返回 CORS 头（`ocr-scf.js` 里已透传）
+2. 回到 **函数 URL 配置**，检查 CORS 里是否允许 `Content-Type` 头
+3. 保存后重新触发即可
 
-> 注：`ocr-scf.js` 本身已返回 `Access-Control-Allow-Origin: *` 等头，但在 API 网关层再开一次更稳。
+> 注：`ocr-scf.js` 本身已返回 `Access-Control-Allow-Origin: *` 等头，函数 URL 的 CORS 配置再开一次更稳。
 
 ## 费用提示
 
 - SCF 有每月免费额度（调用次数 + 运行时间），个人/小范围使用通常免费
-- API 网关也有免费额度
+- 函数 URL 走外网出流量，有少量免费额度，超出按量计费
 - 腾讯云 OCR 服务按调用量计费，新用户通常有免费资源包
 
 ## 故障排查
 
 | 现象 | 可能原因 |
 |---|---|
-| 前端报 "无法连接识别服务" | API 网关地址填错，或 CORS 未开启 |
+| 前端报 "无法连接识别服务" | 函数 URL 地址填错，或 CORS 未开启 |
 | 后端返回 "服务端未配置密钥" | SCF 环境变量 `TENCENT_SECRET_ID`/`TENCENT_SECRET_KEY` 没填或拼错 |
 | 后端返回 "腾讯云返回错误：AuthFailure" | 密钥填错，或密钥无 OCR 权限 |
 | 后端返回 "腾讯云返回错误：FailedOperation" | 文字识别服务未开通，或额度用完 |

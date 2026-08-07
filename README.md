@@ -156,7 +156,9 @@
 
 ### 方式三：腾讯云 SCF（国内稳定访问，推荐）
 
-如果 Vercel 在国内访问困难，把 OCR 后端部署到 **腾讯云云函数 SCF + API 网关**，国内访问又快又稳。
+如果 Vercel 在国内访问困难，把 OCR 后端部署到 **腾讯云云函数 SCF + 函数 URL**，国内访问又快又稳。
+
+> 注意：腾讯云 API 网关触发器已于 2024 年 7 月 1 日起停止新建，因此改用 **函数 URL** 作为公网访问入口。
 
 1. 确认已有腾讯云密钥（SecretId / SecretKey）并开通「文字识别 → 通用手写体识别」。
 2. 在项目根目录打包：
@@ -169,8 +171,8 @@
    - 执行方法：`index.main_handler`
    - 本地上传 `dist/ocr-scf.zip`
    - 环境变量：`TENCENT_SECRET_ID`、`TENCENT_SECRET_KEY`、`TENCENT_OCR_REGION`（可选）
-4. 创建 **API 网关触发器**，选 **免鉴权**，获得 HTTPS 地址。
-5. 把 API 网关地址填到前端「⚙️ 识别接口地址」里即可。
+4. 在函数配置里 **开启函数 URL**，选 **无鉴权**，并开启 CORS（允许 `*`、`POST, OPTIONS`、`Content-Type`）。
+5. 把控制台给出的函数 URL 填到前端「⚙️ 识别接口地址」里即可。
 
 详细步骤、CORS 配置和故障排查见 `deploy/README-SCF.md`。
 
