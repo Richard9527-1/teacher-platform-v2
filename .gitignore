@@ -12,6 +12,9 @@ node_modules/
 .vercel/
 .netlify/
 
+# 本地构建产物（deploy/scf-package.js 生成，勿提交）
+dist/
+
 # 系统 / 编辑器
 .DS_Store
 Thumbs.db
