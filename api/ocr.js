@@ -19,6 +19,7 @@
 // ============================================================
 
 const crypto = require('crypto');
+const https = require('https');
 
 const HOST = 'ocr.tencentcloudapi.com';
 const SERVICE = 'ocr';
@@ -70,27 +71,53 @@ function buildAuthorization(secretId, secretKey, timestamp, payload) {
   return `TC3-HMAC-SHA256 Credential=${secretId}/${credentialScope}, SignedHeaders=${signedHeaders}, Signature=${signature}`;
 }
 
+// ---- 用 Node 内置 https 发 JSON POST（零依赖，兼容无全局 fetch 的 Node 16）----
+function httpsPostJson(payload, headers) {
+  return new Promise((resolve, reject) => {
+    const data = Buffer.from(payload, 'utf8');
+    const options = {
+      hostname: HOST,
+      port: 443,
+      path: '/',
+      method: 'POST',
+      headers: Object.assign({}, headers, {
+        'Content-Length': data.length
+      })
+    };
+    const req = https.request(options, (resp) => {
+      let body = '';
+      resp.on('data', (chunk) => { body += chunk; });
+      resp.on('end', () => {
+        try {
+          resolve(JSON.parse(body));
+        } catch (e) {
+          reject(new Error('腾讯云响应解析失败: ' + body.slice(0, 200)));
+        }
+      });
+    });
+    req.on('error', reject);
+    req.write(data);
+    req.end();
+  });
+}
+
 // ---- 发一次腾讯云请求，返回 Response 对象 ----
 async function requestTencent(payloadObj, secretId, secretKey, region) {
   const payload = JSON.stringify(payloadObj);
   const timestamp = Math.floor(Date.now() / 1000);
   const authorization = buildAuthorization(secretId, secretKey, timestamp, payload);
 
-  const tcResp = await fetch(`https://${HOST}`, {
-    method: 'POST',
-    headers: {
-      Authorization: authorization,
-      'Content-Type': 'application/json; charset=utf-8',
-      Host: HOST,
-      'X-TC-Action': ACTION,
-      'X-TC-Version': VERSION,
-      'X-TC-Timestamp': String(timestamp),
-      'X-TC-Region': region
-    },
-    body: payload
-  });
+  const headers = {
+    Authorization: authorization,
+    'Content-Type': 'application/json; charset=utf-8',
+    Host: HOST,
+    'X-TC-Action': ACTION,
+    'X-TC-Version': VERSION,
+    'X-TC-Timestamp': String(timestamp),
+    'X-TC-Region': region
+  };
 
-  const json = await tcResp.json();
+  const json = await httpsPostJson(payload, headers);
   return json.Response || {};
 }
 
