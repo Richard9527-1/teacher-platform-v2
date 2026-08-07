@@ -152,6 +152,28 @@
 
 > 改完密钥或环境变量后，需在 Vercel 里 **Redeploy** 一次才生效。
 
+> ⚠️ 国内访问 Vercel 可能超时/需梯子。若遇到 `ERR_CONNECTION_TIMED_OUT`，请改用下方「腾讯云 SCF」方案。
+
+### 方式三：腾讯云 SCF（国内稳定访问，推荐）
+
+如果 Vercel 在国内访问困难，把 OCR 后端部署到 **腾讯云云函数 SCF + API 网关**，国内访问又快又稳。
+
+1. 确认已有腾讯云密钥（SecretId / SecretKey）并开通「文字识别 → 通用手写体识别」。
+2. 在项目根目录打包：
+   ```bash
+   node deploy/scf-package.js
+   ```
+   生成 `dist/ocr-scf.zip`。
+3. 登录 [腾讯云 SCF 控制台](https://console.cloud.tencent.com/scf)，新建函数：
+   - 运行环境：**Node.js 16.18+**
+   - 执行方法：`index.main_handler`
+   - 本地上传 `dist/ocr-scf.zip`
+   - 环境变量：`TENCENT_SECRET_ID`、`TENCENT_SECRET_KEY`、`TENCENT_OCR_REGION`（可选）
+4. 创建 **API 网关触发器**，选 **免鉴权**，获得 HTTPS 地址。
+5. 把 API 网关地址填到前端「⚙️ 识别接口地址」里即可。
+
+详细步骤、CORS 配置和故障排查见 `deploy/README-SCF.md`。
+
 ### 备选：Cloudflare Pages
 
 同样连 GitHub 仓库，构建命令留空、输出目录填 `/`，
@@ -230,7 +252,11 @@ https://你的项目.vercel.app/api/ocr
 │     ├─ exam.js  essay.js  lesson-plan.js  ...
 ├─ dev-server.js             ★ 本地开发服务器（零依赖，等价于 vercel dev）
 ├─ api/
-│  └─ ocr.js                 ★ 服务端代理（腾讯云 OCR，TC3 签名，零依赖）
+│  ├─ ocr.js                 ★ 服务端代理（腾讯云 OCR，TC3 签名，零依赖）
+│  └─ ocr-scf.js             ★ 腾讯云 SCF 入口适配器
+├─ deploy/
+│  ├─ scf-package.js         SCF 部署包打包脚本
+│  └─ README-SCF.md          腾讯云 SCF 部署详细说明
 ├─ data/sample-data.js
 ├─ .env.example              环境变量样例
 ├─ vercel.json               Vercel 部署配置（无构建 + api 函数）
